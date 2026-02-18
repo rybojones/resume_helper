@@ -40,6 +40,18 @@ python -m resume_helper \
   --output resumes/enhanced/tailored_resume.txt  # optional; auto-named if omitted
 ```
 
+### Job posting input
+
+`--job` accepts either a URL or raw pasted text.
+
+URL scraping works for **public** job postings (Ashby, Lever, Greenhouse public pages, etc.).
+Pages behind a login wall (e.g. LinkedIn, Built In matches, Workday SSO) will return the login
+screen instead of the job content — in those cases, copy-paste the job description as raw text:
+
+```bash
+python -m resume_helper --job "$(pbpaste)"   # macOS: paste from clipboard
+```
+
 ---
 
 ## Project Structure
