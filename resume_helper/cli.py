@@ -8,7 +8,7 @@ def main() -> None:
         prog="resume-helper",
         description="Tailor a resume to a job posting using an LLM.",
     )
-    parser.add_argument("--resume", help="Path to base resume PDF (default: resumes/legacy/default.pdf)")
+    parser.add_argument("--resume", help="Path to base resume PDF (default: resumes/legacy/default_resume.pdf)")
     parser.add_argument("--job", required=True, help="Job posting URL or raw text")
     parser.add_argument("--projects", help="Path to projects.json (default: data/projects.json)")
     parser.add_argument("--role", help="Role tag to filter projects (e.g. data_scientist)")

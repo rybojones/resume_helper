@@ -26,7 +26,7 @@ A CLI tool that tailors a resume to a job posting using an LLM.
 ```bash
 python -m resume_helper \
   --job "https://jobs.example.com/ds-role" \
-  --resume resumes/legacy/data_scientist.pdf \   # optional; defaults to resumes/legacy/default.pdf
+  --resume resumes/legacy/data_scientist.pdf \   # optional; defaults to resumes/legacy/resume_default.pdf
   --projects data/projects.json \                # optional; defaults to data/projects.json
   --role data_scientist \                        # optional; filters projects by role tag
   --provider claude \                            # optional; defaults to claude
@@ -52,7 +52,7 @@ python -m resume_helper --job "$(pbpaste)"   # macOS: paste from clipboard
 ```
 resume_helper/
 ├── resumes/
-│   ├── legacy/          # Input resumes (default.pdf lives here)
+│   ├── legacy/          # Input resumes (resume_default.pdf lives here)
 │   └── enhanced/        # Output tailored resumes written here
 ├── data/
 │   └── projects.json    # Master projects database
