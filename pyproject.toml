@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "resume-helper"
+version = "0.1.0"
+description = "CLI tool to tailor resumes to job postings using an LLM"
+requires-python = ">=3.11"
+dependencies = [
+    "pdfplumber>=0.11",
+    "requests>=2.32",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.2",
+    "anthropic>=0.28",
+    "jsonschema>=4.22",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+resume-helper = "resume_helper.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["resume_helper*"]

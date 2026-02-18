@@ -1,0 +1,33 @@
+# Environment
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Provided resume input
+resumes/legacy/*
+
+# Generated resume output
+resumes/enhanced/*.txt
+resumes/enhanced/*.pdf
+
+# macOS
+.DS_Store
+
+# Claude Code internal files
+.claude/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
