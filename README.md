@@ -6,20 +6,13 @@ A CLI tool that tailors a resume to a job posting using an LLM.
 
 ## Setup
 
-1. **Create and activate the virtual environment**
-
-   ```bash
-   python -m venv ~/Dev/.envs/resume
-   activate resume
-   ```
-
-2. **Install dependencies**
+1. **Install dependencies**
 
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Configure your API key**
+2. **Configure your API key**
 
    ```bash
    cp .env.example .env
@@ -37,7 +30,7 @@ python -m resume_helper \
   --projects data/projects.json \                # optional; defaults to data/projects.json
   --role data_scientist \                        # optional; filters projects by role tag
   --provider claude \                            # optional; defaults to claude
-  --output resumes/enhanced/tailored_resume.txt  # optional; auto-named if omitted
+  --output resumes/enhanced/tailored_resume.md   # optional; auto-named if omitted
 ```
 
 ### Job posting input

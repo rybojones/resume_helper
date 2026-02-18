@@ -17,7 +17,7 @@ build/
 resumes/legacy/*
 
 # Generated resume output
-resumes/enhanced/*.txt
+resumes/enhanced/*.md
 resumes/enhanced/*.pdf
 
 # macOS
