@@ -9,7 +9,7 @@
       "description_long": "Designed and productionized a gradient-boosted classification model (XGBoost) to predict monthly subscriber churn for a 2M-customer SaaS platform. Owned the full ML lifecycle: feature engineering from raw SQL event logs, hyperparameter tuning via cross-validation, Docker-based deployment, and a Grafana dashboard for ongoing monitoring. Collaborated with the CX team to operationalize intervention workflows triggered by model scores.",
       "role": "Lead Data Scientist",
       "skills": ["Python", "XGBoost", "SQL", "Docker", "Grafana"],
-      "role_tags": ["data_scientist", "mle"],
+      "role_tags": ["data_scientist", "machine_learning_engineer", "data_analyst"],
       "impact": [
         "Reduced churn by 12% in Q1 2024",
         "Saved 8 hours/week of manual analyst work",
@@ -28,7 +28,7 @@
       "description_long": "Led architecture and implementation of a streaming fraud detection platform on Apache Kafka + Flink. Built ensemble models (LightGBM + rule engine) trained on 3 years of transaction history. Designed feature store backed by Redis for low-latency feature serving. Worked closely with fraud ops to tune precision/recall thresholds and built an analyst-facing review queue integrated with the existing case management system.",
       "role": "Senior ML Engineer",
       "skills": ["Python", "Kafka", "Flink", "LightGBM", "Redis", "AWS"],
-      "role_tags": ["mle", "data_engineer"],
+      "role_tags": ["machine_learning_engineer", "data_engineer", "data_scientist"],
       "impact": [
         "Caught 34% more fraudulent transactions vs. legacy rule-based system",
         "Reduced false-positive rate by 18%, lowering friction for legitimate customers",
@@ -47,7 +47,7 @@
       "description_long": "Fine-tuned a DistilBERT model on 200K labeled support tickets to classify intent and route to the correct tier-1/tier-2 queue. Built a FastAPI inference service deployed on GCP Cloud Run with auto-scaling. Implemented an active learning loop so support agents could flag mispredictions, which fed back into monthly retraining. Delivered a Looker dashboard tracking routing accuracy and queue volume by category.",
       "role": "NLP Engineer",
       "skills": ["Python", "HuggingFace Transformers", "FastAPI", "GCP", "Looker"],
-      "role_tags": ["data_scientist", "nlp_engineer"],
+      "role_tags": ["ai_engineer", "machine_learning_engineer", "data_scientist"],
       "impact": [
         "Auto-routed 70% of tickets with 91% accuracy",
         "Reduced average handle time by 25%",

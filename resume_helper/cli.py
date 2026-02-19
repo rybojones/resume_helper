@@ -3,6 +3,7 @@ import argparse
 import sys
 
 from resume_helper.config import DEFAULT_PROVIDER
+from resume_helper.data.projects_db import ROLE_TAGS
 
 
 def main() -> None:
@@ -13,7 +14,8 @@ def main() -> None:
     parser.add_argument("--resume", help="Path to base resume PDF (default: resumes/legacy/default_resume.pdf)")
     parser.add_argument("--job", required=True, help="Job posting URL or raw text")
     parser.add_argument("--projects", help="Path to projects.json (default: data/projects.json)")
-    parser.add_argument("--role", help="Role tag to filter projects (e.g. data_scientist)")
+    parser.add_argument("--role", choices=ROLE_TAGS, metavar="ROLE",
+                        help=f"Filter projects by role tag. Valid values: {', '.join(ROLE_TAGS)}")
     parser.add_argument("--provider", default=DEFAULT_PROVIDER, help=f"LLM provider (default: {DEFAULT_PROVIDER})")
     parser.add_argument("--output", help="Output file path (auto-named if omitted)")
 
