@@ -13,4 +13,5 @@ DEFAULT_PROJECTS_PATH = PROJECT_ROOT / "data" / "projects.json"
 OUTPUT_DIR = PROJECT_ROOT / "resumes" / "enhanced"
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-DEFAULT_PROVIDER = "claude"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+DEFAULT_PROVIDER = "openai"

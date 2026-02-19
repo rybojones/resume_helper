@@ -5,3 +5,4 @@ lxml>=5.2
 anthropic>=0.28
 jsonschema>=4.22
 python-dotenv>=1.0
+openai>=1.30

@@ -67,5 +67,8 @@ def _get_provider(provider: str):
     if provider == "claude":
         from resume_helper.llm.claude_provider import ClaudeProvider
         return ClaudeProvider()
+    if provider == "openai":
+        from resume_helper.llm.openai_provider import OpenAIProvider
+        return OpenAIProvider()
     print(f"[resume-helper] ERROR: Provider '{provider}' is not yet implemented.", file=sys.stderr)
     sys.exit(1)
