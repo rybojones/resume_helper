@@ -2,6 +2,8 @@
 import argparse
 import sys
 
+from resume_helper.config import DEFAULT_PROVIDER
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -12,7 +14,7 @@ def main() -> None:
     parser.add_argument("--job", required=True, help="Job posting URL or raw text")
     parser.add_argument("--projects", help="Path to projects.json (default: data/projects.json)")
     parser.add_argument("--role", help="Role tag to filter projects (e.g. data_scientist)")
-    parser.add_argument("--provider", default="openai", help="LLM provider (default: openai)")
+    parser.add_argument("--provider", default=DEFAULT_PROVIDER, help=f"LLM provider (default: {DEFAULT_PROVIDER})")
     parser.add_argument("--output", help="Output file path (auto-named if omitted)")
 
     args = parser.parse_args()

@@ -16,7 +16,7 @@ A CLI tool that tailors a resume to a job posting using an LLM.
 
    ```bash
    cp .env.example .env
-   # Edit .env and add your ANTHROPIC_API_KEY
+   # Edit .env and add your key — GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY
    ```
 
 ---
@@ -29,7 +29,7 @@ python -m resume_helper \
   --resume resumes/legacy/data_scientist.pdf \   # optional; defaults to resumes/legacy/resume_default.pdf
   --projects data/projects.json \                # optional; defaults to data/projects.json
   --role data_scientist \                        # optional; filters projects by role tag
-  --provider openai \                            # optional; defaults to openai
+  --provider gemini \                            # optional; defaults to gemini
   --output resumes/enhanced/tailored_resume.md   # optional; auto-named if omitted
 ```
 
