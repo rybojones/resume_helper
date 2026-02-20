@@ -28,6 +28,13 @@ role, while leaving all other resume sections untouched.
    # Edit .env and add your key — GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY
    ```
 
+4. **Create projects.json database**
+
+  ```bash
+  cp data/projects_empty.json data/projects.json
+  # Add your projects to projects.json manually or using resume_helper.import_projects
+  ```
+
 ---
 
 ## Resume format

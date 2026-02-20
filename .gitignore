@@ -13,6 +13,9 @@ dist/
 build/
 .eggs/
 
+# Projects database
+data/projects.json
+
 # Provided resume input
 resumes/legacy/*
 
