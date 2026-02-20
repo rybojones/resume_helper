@@ -13,7 +13,7 @@ DEFAULT_PROJECTS_PATH = PROJECT_ROOT / "data" / "projects.json"
 OUTPUT_DIR = PROJECT_ROOT / "resumes" / "enhanced"
 OUTPUT_DIR_MD   = OUTPUT_DIR / "md"
 OUTPUT_DIR_DOCX = OUTPUT_DIR / "docx"
-DEFAULT_REFERENCE_DOCX = PROJECT_ROOT / "resumes" / "legacy" / "resume_template.docx"
+DEFAULT_REFERENCE_DOCX = PROJECT_ROOT / "resumes" / "legacy" / "pandoc_template.docx"
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")

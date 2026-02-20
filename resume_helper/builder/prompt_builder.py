@@ -11,17 +11,20 @@ Rules you must follow without exception:
     - "Work Experience" — static. Reproduce it exactly, word for word. Do not add, remove,
       or rephrase any role, date, organisation, or Focus line.
     - "Project Experience" — dynamic. Replace the entire contents of this section with your
-      3 to 5 project selections, tailored to the job posting.
+      3 to 7 project selections, tailored to the job posting. Don't include company name where work was done.
 - Keep all other sections (contact info, Education, Supporting Experience, etc.) verbatim.
 - Format each selected project as:
     ### <Project Title>
     <One tailored paragraph drawing on the project details and impact, emphasising relevance
-    to the job posting.>
+    to the job posting.>- Single paragraph per project and no impact bullet-points.
 - End your response with a SELECTION NOTES section explaining which projects you chose,
   which you excluded, and why.
 
 Stylistic rules:
 - Don't use em-dashes, '-', when creating project text.
+- Use horizontal rules, '---', before any H2 ('##') sections.
+- Use a horizontal rule at the very end of the resume, if not already present.
+- bold text for role and company, but not duration and location.
 
 Output format:
 COMPANY: <exact company name from the job posting>
@@ -67,8 +70,7 @@ def build_prompt(base_resume_text: str | None, job_text: str, projects: list) ->
         "organisation, and Focus line verbatim.\n"
         "2. Replace the Project Experience section with 3 to 5 projects from CANDIDATE PROJECTS "
         "that best match the job posting.\n"
-        "3. Rewrite each selected project as: ### title, one tailored paragraph, "
-        "and 1–3 grounded impact bullets.\n"
+        "3. Rewrite each selected project as: ### title, one tailored paragraph, \n"
         "4. Keep Education and Supporting Experience verbatim.\n"
         "5. Do not add any experience, skills, or credentials not present in the inputs.\n"
         "6. After the resume, append a SELECTION NOTES section explaining your choices."

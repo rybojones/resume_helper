@@ -187,8 +187,8 @@ check("OUTPUT_DIR_MD contains 'md'",
       lambda: None if "md" in str(OUTPUT_DIR_MD) else (_ for _ in ()).throw(AssertionError(OUTPUT_DIR_MD)))
 check("OUTPUT_DIR_DOCX contains 'docx'",
       lambda: None if "docx" in str(OUTPUT_DIR_DOCX) else (_ for _ in ()).throw(AssertionError(OUTPUT_DIR_DOCX)))
-check("DEFAULT_REFERENCE_DOCX points to resume_template.docx",
-      lambda: None if "resume_template.docx" in str(DEFAULT_REFERENCE_DOCX) else (_ for _ in ()).throw(AssertionError(DEFAULT_REFERENCE_DOCX)))
+check("DEFAULT_REFERENCE_DOCX points to pandoc_template.docx",
+      lambda: None if "pandoc_template.docx" in str(DEFAULT_REFERENCE_DOCX) else (_ for _ in ()).throw(AssertionError(DEFAULT_REFERENCE_DOCX)))
 
 # ---------------------------------------------------------------------------
 # Default resume and projects files exist

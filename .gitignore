@@ -22,6 +22,8 @@ resumes/legacy/*
 # Generated resume output
 resumes/enhanced/*.md
 resumes/enhanced/*.pdf
+resumes/enhanced/md/
+resumes/enhanced/docx/
 
 # macOS
 .DS_Store
