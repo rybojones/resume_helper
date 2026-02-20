@@ -45,6 +45,16 @@ class ProjectsFile(BaseModel):
     projects: list[ProjectRecord]
 
 
+class DuplicateMatch(BaseModel):
+    matched_id: str = ""  # ID of matched existing project; empty string = no match
+    reason: str
+
+
+class MergedProjectText(BaseModel):
+    summary: str
+    description_long: str
+
+
 class ResumeOutput(BaseModel):
     resume_markdown: str
     selection_notes: str = ""

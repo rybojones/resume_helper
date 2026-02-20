@@ -39,5 +39,16 @@ class GeminiProvider:
             generation_config={"max_tokens": MAX_TOKENS},
         )
 
+    def complete_structured_one(self, system_prompt: str, user_prompt: str, response_model):
+        return self._instructor.create(
+            model=MODEL,
+            response_model=response_model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            generation_config={"max_tokens": MAX_TOKENS},
+        )
+
     def get_model_name(self) -> str:
         return MODEL

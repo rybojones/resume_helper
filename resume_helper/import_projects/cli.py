@@ -6,6 +6,7 @@ from resume_helper.config import DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, DEF
 from resume_helper.parsers.pdf_parser import parse_pdf
 from resume_helper.data.projects_db import load_projects, merge_projects
 from resume_helper.import_projects.extractor import extract_projects
+from resume_helper.import_projects.deduplicator import resolve_duplicates
 from resume_helper.import_projects.coverage_check import check_coverage
 
 
@@ -52,13 +53,24 @@ def main() -> None:
 
     print(f"[import-projects] Extracted {len(new_projects)} project(s) from resume.", file=sys.stderr)
 
-    # --- Load existing and merge ---
+    # --- Load existing ---
     try:
         existing = load_projects(args.projects)
     except FileNotFoundError:
         existing = []
 
-    added, merged = merge_projects(existing, new_projects, args.projects)
+    # --- Deduplicate against existing ---
+    if existing:
+        print(f"[import-projects] Checking {len(new_projects)} new project(s) for duplicates against {len(existing)} existing...", file=sys.stderr)
+        truly_new, updated_existing = resolve_duplicates(existing, new_projects, llm)
+        n_merged = len(new_projects) - len(truly_new)
+        if n_merged:
+            print(f"[import-projects] Merged {n_merged} duplicate(s) into existing records.", file=sys.stderr)
+    else:
+        truly_new, updated_existing = list(new_projects), []
+
+    # --- Merge new into database ---
+    added, merged = merge_projects(updated_existing, truly_new, args.projects)
 
     print(f"[import-projects] Added {added} new project(s). Total: {len(merged)}.", file=sys.stderr)
     print(f"[import-projects] projects.json updated: {args.projects}", file=sys.stderr)

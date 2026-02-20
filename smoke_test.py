@@ -27,7 +27,8 @@ def check(name: str, fn):
 # ---------------------------------------------------------------------------
 print("\n-- imports --")
 
-check("models imports", lambda: __import__("resume_helper.models", fromlist=["ProjectRecord", "ProjectsFile", "ResumeOutput"]))
+check("models imports", lambda: __import__("resume_helper.models", fromlist=["ProjectRecord", "ProjectsFile", "ResumeOutput", "DuplicateMatch", "MergedProjectText"]))
+check("deduplicator imports", lambda: __import__("resume_helper.import_projects.deduplicator", fromlist=["resolve_duplicates"]))
 check("config imports", lambda: __import__("resume_helper.config", fromlist=["PROJECT_ROOT"]))
 check("projects_db imports", lambda: __import__("resume_helper.data.projects_db", fromlist=["load_projects"]))
 check("pdf_parser imports", lambda: __import__("resume_helper.parsers.pdf_parser", fromlist=["parse_pdf"]))
@@ -48,7 +49,7 @@ check("import_projects.cli imports", lambda: __import__("resume_helper.import_pr
 print("\n-- models --")
 
 from pydantic import ValidationError
-from resume_helper.models import ProjectRecord, ResumeOutput
+from resume_helper.models import ProjectRecord, ResumeOutput, DuplicateMatch, MergedProjectText
 
 _WELL_FORMED_RESUME = (
     "# Jane Smith\n\n"
@@ -85,6 +86,84 @@ def _project_record_empty_role_tags():
         pass
 
 check("ProjectRecord rejects empty role_tags", _project_record_empty_role_tags)
+
+# ---------------------------------------------------------------------------
+# Deduplicator
+# ---------------------------------------------------------------------------
+print("\n-- deduplicator --")
+
+from resume_helper.import_projects.deduplicator import resolve_duplicates
+
+check("DuplicateMatch accepts empty matched_id",
+      lambda: DuplicateMatch(matched_id="", reason="no match found"))
+
+check("DuplicateMatch accepts a real matched_id",
+      lambda: DuplicateMatch(matched_id="proj_001", reason="same project"))
+
+check("MergedProjectText validates",
+      lambda: MergedProjectText(summary="A summary.", description_long="A longer description."))
+
+
+def _resolve_duplicates_no_existing():
+    existing = []
+    new = [ProjectRecord(title="T", summary="s", skills=[], role_tags=["data_scientist"], impact=[])]
+    truly_new, updated = resolve_duplicates(existing, new, llm=None)
+    assert len(truly_new) == 1
+    assert updated == []
+
+
+check("resolve_duplicates with no existing returns all as new", _resolve_duplicates_no_existing)
+
+
+def _resolve_duplicates_stub_no_match():
+    """Stub LLM always returns no match — all new projects should pass through."""
+    class _StubLLM:
+        def complete_structured_one(self, _sys, _usr, response_model):
+            return DuplicateMatch(matched_id="", reason="no match")
+
+    existing = [
+        {"id": "proj_001", "title": "Old Project", "summary": "old summary",
+         "skills": ["Python"], "role_tags": ["data_scientist"], "impact": [],
+         "organization": "", "role": "", "dates": {}, "description_long": "",
+         "keywords": [], "include_by_default": False, "notes": ""}
+    ]
+    new = [ProjectRecord(title="New Project", summary="new summary", skills=["SQL"],
+                         role_tags=["data_analyst"], impact=[])]
+    truly_new, updated = resolve_duplicates(existing, new, _StubLLM())
+    assert len(truly_new) == 1, f"expected 1 truly new, got {len(truly_new)}"
+    assert truly_new[0].title == "New Project"
+
+
+check("resolve_duplicates stub no-match passes project through", _resolve_duplicates_stub_no_match)
+
+
+def _resolve_duplicates_stub_match():
+    """Stub LLM always returns a match — project should be merged into existing."""
+    class _StubLLM:
+        def complete_structured_one(self, _sys, _usr, response_model):
+            if response_model is DuplicateMatch:
+                return DuplicateMatch(matched_id="proj_001", reason="same project")
+            return MergedProjectText(summary="merged summary", description_long="merged desc")
+
+    existing = [
+        {"id": "proj_001", "title": "Old Project", "summary": "old summary",
+         "skills": ["Python"], "role_tags": ["data_scientist"], "impact": ["10% improvement"],
+         "organization": "Acme", "role": "", "dates": {}, "description_long": "old desc",
+         "keywords": [], "include_by_default": False, "notes": ""}
+    ]
+    new = [ProjectRecord(title="Old Project v2", summary="new summary", skills=["Python", "SQL"],
+                         role_tags=["data_scientist", "data_analyst"], impact=["10% improvement", "saved $1M"],
+                         description_long="new desc")]
+    truly_new, updated = resolve_duplicates(existing, new, _StubLLM())
+    assert len(truly_new) == 0, f"expected 0 truly new, got {len(truly_new)}"
+    proj = updated[0]
+    assert proj["summary"] == "merged summary"
+    assert "SQL" in proj["skills"]
+    assert "data_analyst" in proj["role_tags"]
+    assert "saved $1M" in proj["impact"]
+
+
+check("resolve_duplicates stub match merges fields correctly", _resolve_duplicates_stub_match)
 
 # ---------------------------------------------------------------------------
 # Config defaults
