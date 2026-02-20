@@ -1,7 +1,8 @@
-"""Post-process LLM output: strip SELECTION NOTES, normalize whitespace, write file."""
+"""Post-process LLM output: strip metadata lines and SELECTION NOTES, normalize whitespace, write file."""
 import re
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 from pydantic import ValidationError
 
@@ -12,13 +13,38 @@ _NOTES_PATTERN = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
+_META_PATTERN = re.compile(r"^(COMPANY|ROLE):\s*(.+)$", re.IGNORECASE)
 
-def format_and_write(raw_output: str, output_path: str) -> str:
-    """Strip SELECTION NOTES, clean whitespace, write plain text to output_path.
+
+class FormattedResume(NamedTuple):
+    text: str
+    company: str
+    role: str
+
+
+def format_and_write(raw_output: str, output_path: str) -> FormattedResume:
+    """Strip metadata lines and SELECTION NOTES, clean whitespace, write plain text to output_path.
 
     Prints the SELECTION NOTES block to stderr for debugging.
-    Returns the cleaned resume text.
+    Returns a FormattedResume namedtuple with the cleaned text, company, and role.
     """
+    # --- Extract COMPANY / ROLE metadata lines ---
+    company = ""
+    role = ""
+    remaining_lines = []
+    for line in raw_output.splitlines():
+        m = _META_PATTERN.match(line.strip())
+        if m:
+            key, value = m.group(1).upper(), m.group(2).strip()
+            if key == "COMPANY":
+                company = value
+            elif key == "ROLE":
+                role = value
+        else:
+            remaining_lines.append(line)
+    raw_output = "\n".join(remaining_lines)
+
+    # --- Extract SELECTION NOTES ---
     match = _NOTES_PATTERN.search(raw_output)
     if match:
         resume_text = raw_output[: match.start()]
@@ -40,7 +66,7 @@ def format_and_write(raw_output: str, output_path: str) -> str:
     out.write_text(cleaned, encoding="utf-8")
     print(f"[resume-helper] Resume written to: {out}", file=sys.stderr)
 
-    return cleaned
+    return FormattedResume(text=cleaned, company=company, role=role)
 
 
 def _normalize_whitespace(text: str) -> str:

@@ -74,7 +74,11 @@ def build_resume(
     resolved_output = _resolve_output_path(output_path, role_tag)
 
     # --- Format and write ---
-    format_and_write(raw_output, str(resolved_output))
+    result = format_and_write(raw_output, str(resolved_output))
+
+    # --- Rename to company+role-based filename if auto-named ---
+    if not output_path:
+        resolved_output = _rename_with_metadata(resolved_output, result.company, result.role)
 
     # --- Convert to DOCX (soft failure) ---
     ref = Path(reference_doc) if reference_doc else DEFAULT_REFERENCE_DOCX
@@ -109,14 +113,34 @@ def _preflight_coverage_check(resume_text: str, projects: list) -> None:
         )
 
 
+def _slugify(text: str) -> str:
+    """Return a lowercase, underscore-separated filesystem slug, capped at 40 chars."""
+    import re as _re
+    slug = _re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
+    return slug[:40]
+
+
 def _resolve_output_path(output_path: str | None, role_tag: str | None) -> Path:
     if output_path:
         return Path(output_path)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    datestamp = datetime.now().strftime("%Y%m%d")
     suffix = f"_{role_tag}" if role_tag else ""
-    filename = f"resume{suffix}_{timestamp}.md"
+    filename = f"resume{suffix}_{datestamp}.md"
     OUTPUT_DIR_MD.mkdir(parents=True, exist_ok=True)
     return OUTPUT_DIR_MD / filename
+
+
+def _rename_with_metadata(current_path: Path, company: str, role: str) -> Path:
+    """Rename the written file to include company and role slugs; return the new path."""
+    datestamp = datetime.now().strftime("%Y%m%d")
+    parts = [_slugify(company) if company else None, _slugify(role) if role else None]
+    meta = "_".join(p for p in parts if p)
+    new_name = f"resume_{meta}_{datestamp}.md" if meta else current_path.name
+    new_path = current_path.parent / new_name
+    if new_path != current_path:
+        current_path.rename(new_path)
+        print(f"[resume-helper] Resume renamed to: {new_path}", file=sys.stderr)
+    return new_path
 
 
 def _resolve_docx_path(md_path: Path) -> Path:

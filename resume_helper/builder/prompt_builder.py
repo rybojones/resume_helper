@@ -24,6 +24,8 @@ Stylistic rules:
 - Don't use em-dashes, '-', when creating project text.
 
 Output format:
+COMPANY: <exact company name from the job posting>
+ROLE: <exact job title from the job posting>
 [Full markdown resume]
 
 ## SELECTION NOTES

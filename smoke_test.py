@@ -38,7 +38,7 @@ check("claude_provider imports", lambda: __import__("resume_helper.llm.claude_pr
 check("gemini_provider imports", lambda: __import__("resume_helper.llm.gemini_provider", fromlist=["GeminiProvider"]))
 check("prompt_builder imports", lambda: __import__("resume_helper.builder.prompt_builder", fromlist=["build_prompt"]))
 check("resume_builder imports", lambda: __import__("resume_helper.builder.resume_builder", fromlist=["build_resume"]))
-check("formatter imports", lambda: __import__("resume_helper.output.formatter", fromlist=["format_and_write"]))
+check("formatter imports", lambda: __import__("resume_helper.output.formatter", fromlist=["format_and_write", "FormattedResume"]))
 check("md2docx imports", lambda: __import__("resume_helper.output.md2docx", fromlist=["check_pandoc_installed", "convert_markdown_to_docx"]))
 check("import_projects.extractor imports", lambda: __import__("resume_helper.import_projects.extractor", fromlist=["extract_projects"]))
 check("import_projects.coverage_check imports", lambda: __import__("resume_helper.import_projects.coverage_check", fromlist=["check_coverage"]))
@@ -285,10 +285,12 @@ check("build_prompt instructions reference both section names", _prompt_instruct
 # ---------------------------------------------------------------------------
 print("\n-- formatter --")
 
-from resume_helper.output.formatter import format_and_write
+from resume_helper.output.formatter import format_and_write, FormattedResume
 
 def _formatter_check():
     raw = (
+        "COMPANY: Acme Corp\n"
+        "ROLE: Senior Data Scientist\n"
         "# Jane Smith\n\n"
         "## Work Experience\nSome Corp 2020–2022\n\n"
         "## Project Experience\n### Cool Project\nDid cool things.\n\n"
@@ -296,24 +298,38 @@ def _formatter_check():
     )
     with tempfile.NamedTemporaryFile(suffix=".md", delete=False, mode="w") as f:
         tmp = f.name
-    cleaned = format_and_write(raw, tmp)
+    result = format_and_write(raw, tmp)
     content = Path(tmp).read_text()
     Path(tmp).unlink(missing_ok=True)
+    assert isinstance(result, FormattedResume), "format_and_write should return FormattedResume"
+    assert result.company == "Acme Corp", f"expected 'Acme Corp', got '{result.company}'"
+    assert result.role == "Senior Data Scientist", f"expected 'Senior Data Scientist', got '{result.role}'"
     assert "SELECTION NOTES" not in content, "SELECTION NOTES should be stripped from file"
+    assert "COMPANY:" not in content, "COMPANY metadata should be stripped from file"
+    assert "ROLE:" not in content, "ROLE metadata should be stripped from file"
     assert "Jane Smith" in content, "resume content should be present"
 
 check("formatter strips SELECTION NOTES from written file", _formatter_check)
+check("formatter strips COMPANY/ROLE metadata and returns them", _formatter_check)
 
 # ---------------------------------------------------------------------------
 # Output path uses .md extension
 # ---------------------------------------------------------------------------
 print("\n-- output path --")
 
-from resume_helper.builder.resume_builder import _resolve_output_path
+from resume_helper.builder.resume_builder import _resolve_output_path, _slugify
 
 check("auto-named output path uses .md extension",
       lambda: None if _resolve_output_path(None, None).suffix == ".md"
       else (_ for _ in ()).throw(AssertionError(_resolve_output_path(None, None).suffix)))
+
+check("_slugify lowercases and replaces non-alphanumeric with underscores",
+      lambda: None if _slugify("Acme Corp, Inc.") == "acme_corp_inc"
+      else (_ for _ in ()).throw(AssertionError(_slugify("Acme Corp, Inc."))))
+
+check("_slugify caps output at 40 chars",
+      lambda: None if len(_slugify("x" * 100)) <= 40
+      else (_ for _ in ()).throw(AssertionError(len(_slugify("x" * 100)))))
 
 # ---------------------------------------------------------------------------
 # Summary
