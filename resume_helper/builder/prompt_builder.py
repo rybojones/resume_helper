@@ -5,11 +5,20 @@ You are an expert resume writer with deep experience tailoring resumes to specif
 
 Rules you must follow without exception:
 - Output well-structured markdown. Use # for the candidate name, ## for section headers,
-  ### for job/project titles, **bold** for company names and dates, and - for bullet points.
+  ### for project titles, **bold** for company names and dates, and - for bullet points.
 - Never invent facts, credentials, or experiences not present in the inputs.
-- Select the 3 to 5 most relevant projects from the candidate projects provided.
-- Preserve every non-project section from the base resume exactly (contact info, education,
-  skills, certifications, etc.) — only the experience/projects section should be tailored.
+- The resume contains two experience sections:
+    - "Work Experience" — static. Reproduce it exactly, word for word. Do not add, remove,
+      or rephrase any role, date, organisation, or Focus line.
+    - "Project Experience" — dynamic. Replace the entire contents of this section with your
+      3 to 5 project selections, tailored to the job posting.
+- Keep all other sections (contact info, Education, Supporting Experience) verbatim.
+- Format each selected project as:
+    ### <Project Title>
+    <One tailored paragraph drawing on the project details and impact, emphasising relevance
+    to the job posting.>
+    - <Impact bullet 1>
+    - <Impact bullet 2>  (include only bullets grounded in the input data)
 - End your response with a SELECTION NOTES section explaining which projects you chose,
   which you excluded, and why.
 
@@ -35,8 +44,9 @@ def build_prompt(base_resume_text: str | None, job_text: str, projects: list) ->
         sections.append(
             "BASE RESUME\n"
             "-----------\n"
-            "No base resume provided. Build the full resume from the candidate projects below,\n"
-            "following a standard chronological format."
+            "No base resume provided. Build the full resume from the candidate projects below.\n"
+            "Use a ## Work Experience section (leave empty or omit) and a ## Project Experience\n"
+            "section containing the selected projects in the format described."
         )
 
     # --- Job posting ---
@@ -50,11 +60,15 @@ def build_prompt(base_resume_text: str | None, job_text: str, projects: list) ->
     sections.append(
         "INSTRUCTIONS\n"
         "------------\n"
-        "1. Keep all non-project sections from the base resume unchanged.\n"
-        "2. Select the 3 to 5 projects that best match the job posting.\n"
-        "3. Rewrite the project bullets to emphasize skills and impact relevant to this role.\n"
-        "4. Do not add any experience, skills, or credentials not present in the inputs.\n"
-        "5. After the resume, append a SELECTION NOTES section explaining your choices."
+        "1. Reproduce the Work Experience section exactly as it appears — every role, date, "
+        "organisation, and Focus line verbatim.\n"
+        "2. Replace the Project Experience section with 3 to 5 projects from CANDIDATE PROJECTS "
+        "that best match the job posting.\n"
+        "3. Rewrite each selected project as: ### title, one tailored paragraph, "
+        "and 1–3 grounded impact bullets.\n"
+        "4. Keep Education and Supporting Experience verbatim.\n"
+        "5. Do not add any experience, skills, or credentials not present in the inputs.\n"
+        "6. After the resume, append a SELECTION NOTES section explaining your choices."
     )
 
     user_prompt = "\n\n" + "\n\n".join(sections) + "\n"

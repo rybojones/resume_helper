@@ -1,12 +1,14 @@
 """Main orchestrator — no CLI concerns."""
 import sys
+from datetime import datetime
 from pathlib import Path
 
-from resume_helper.config import DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH
+from resume_helper.config import DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR
 from resume_helper.parsers.pdf_parser import parse_pdf
 from resume_helper.parsers.job_parser import parse_job_input
 from resume_helper.data.projects_db import load_projects, filter_by_role_tag
 from resume_helper.builder.prompt_builder import build_prompt
+from resume_helper.output.formatter import format_and_write
 
 
 def build_resume(
@@ -49,6 +51,10 @@ def build_resume(
         projects = filter_by_role_tag(projects, role_tag)
         print(f"[resume-helper] Filtered to {len(projects)} project(s) for role: {role_tag}", file=sys.stderr)
 
+    # --- Pre-flight coverage check (advisory only) ---
+    if base_resume_text:
+        _preflight_coverage_check(base_resume_text, projects)
+
     # --- Build prompt ---
     system_prompt, user_prompt = build_prompt(base_resume_text, job_text, projects)
 
@@ -59,8 +65,48 @@ def build_resume(
     # --- Call LLM ---
     raw_output = llm.complete(system_prompt, user_prompt)
 
-    # Print raw output to stdout for inspection (formatter strips and writes file in step 8)
-    print(raw_output)
+    # --- Resolve output path ---
+    resolved_output = _resolve_output_path(output_path, role_tag)
+
+    # --- Format and write ---
+    format_and_write(raw_output, str(resolved_output))
+
+
+def _preflight_coverage_check(resume_text: str, projects: list) -> None:
+    """Warn when none of the project organizations appear in the resume text.
+
+    This is a lightweight heuristic: if projects.json has entries but none of their
+    organization names are found in the resume, the DB likely doesn't cover this resume.
+    Advisory only — build continues regardless.
+    """
+    orgs = [p.get("organization", "").strip() for p in projects if p.get("organization")]
+    if not orgs:
+        # No org data to compare — warn if projects list is also empty
+        if not projects:
+            print(
+                "[resume-helper] WARNING: Some roles in your resume may not be represented in projects.json.\n"
+                "[resume-helper] Run `python -m resume_helper.import_projects` to extract and import them.",
+                file=sys.stderr,
+            )
+        return
+
+    resume_lower = resume_text.lower()
+    covered = any(org.lower() in resume_lower for org in orgs)
+    if not covered:
+        print(
+            "[resume-helper] WARNING: Some roles in your resume may not be represented in projects.json.\n"
+            "[resume-helper] Run `python -m resume_helper.import_projects` to extract and import them.",
+            file=sys.stderr,
+        )
+
+
+def _resolve_output_path(output_path: str | None, role_tag: str | None) -> Path:
+    if output_path:
+        return Path(output_path)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    suffix = f"_{role_tag}" if role_tag else ""
+    filename = f"resume{suffix}_{timestamp}.md"
+    return OUTPUT_DIR / filename
 
 
 def _get_provider(provider: str):

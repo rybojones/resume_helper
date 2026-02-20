@@ -19,6 +19,7 @@ dependencies = [
 
 [project.scripts]
 resume-helper = "resume_helper.cli:main"
+resume-helper-import-projects = "resume_helper.import_projects.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -1,5 +1,6 @@
 """Load, validate, and filter the projects JSON database."""
 import json
+import re
 from pathlib import Path
 
 import jsonschema
@@ -68,6 +69,64 @@ def load_projects(path: str) -> list:
         raise ValueError(f"projects.json validation error: {exc.message}") from exc
 
     return data["projects"]
+
+
+def merge_projects(existing: list, new_projects: list, projects_path: str) -> tuple[int, list]:
+    """Deduplicate new_projects against existing and write the merged list to projects_path.
+
+    Deduplication key: (title, organization) — case-insensitive.
+    Auto-generates IDs for incoming projects that lack them.
+    Returns (count_added, merged_list).
+    """
+    seen = {
+        (_norm(p.get("title", "")), _norm(p.get("organization", "")))
+        for p in existing
+    }
+
+    # Determine the next numeric suffix for ID generation
+    next_id = _next_project_id(existing)
+
+    added = 0
+    merged = list(existing)
+    for proj in new_projects:
+        key = (_norm(proj.get("title", "")), _norm(proj.get("organization", "")))
+        if key in seen:
+            continue
+        # Assign an ID if the LLM didn't provide one
+        if not proj.get("id"):
+            proj["id"] = f"proj_{next_id:03d}"
+            next_id += 1
+        # Ensure required fields have at least an empty default so schema passes
+        proj.setdefault("summary", "")
+        proj.setdefault("skills", [])
+        proj.setdefault("role_tags", [])
+        proj.setdefault("impact", [])
+        merged.append(proj)
+        seen.add(key)
+        added += 1
+
+    resolved = Path(projects_path)
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    with resolved.open("w", encoding="utf-8") as f:
+        json.dump({"projects": merged}, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+    return added, merged
+
+
+def _norm(s: str) -> str:
+    return s.strip().lower()
+
+
+def _next_project_id(projects: list) -> int:
+    """Return the next integer suffix to use for auto-generated project IDs."""
+    max_n = 0
+    for p in projects:
+        pid = p.get("id", "")
+        m = re.search(r"(\d+)$", pid)
+        if m:
+            max_n = max(max_n, int(m.group(1)))
+    return max_n + 1
 
 
 def filter_by_role_tag(projects: list, role_tag: str) -> list:
