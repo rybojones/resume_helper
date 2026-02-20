@@ -39,6 +39,7 @@ check("gemini_provider imports", lambda: __import__("resume_helper.llm.gemini_pr
 check("prompt_builder imports", lambda: __import__("resume_helper.builder.prompt_builder", fromlist=["build_prompt"]))
 check("resume_builder imports", lambda: __import__("resume_helper.builder.resume_builder", fromlist=["build_resume"]))
 check("formatter imports", lambda: __import__("resume_helper.output.formatter", fromlist=["format_and_write"]))
+check("md2docx imports", lambda: __import__("resume_helper.output.md2docx", fromlist=["check_pandoc_installed", "convert_markdown_to_docx"]))
 check("import_projects.extractor imports", lambda: __import__("resume_helper.import_projects.extractor", fromlist=["extract_projects"]))
 check("import_projects.coverage_check imports", lambda: __import__("resume_helper.import_projects.coverage_check", fromlist=["check_coverage"]))
 check("import_projects.cli imports", lambda: __import__("resume_helper.import_projects.cli", fromlist=["main"]))
@@ -170,7 +171,10 @@ check("resolve_duplicates stub match merges fields correctly", _resolve_duplicat
 # ---------------------------------------------------------------------------
 print("\n-- config --")
 
-from resume_helper.config import DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR, DEFAULT_PROVIDER
+from resume_helper.config import (
+    DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR, DEFAULT_PROVIDER,
+    OUTPUT_DIR_MD, OUTPUT_DIR_DOCX, DEFAULT_REFERENCE_DOCX,
+)
 
 check("DEFAULT_RESUME_PATH points to resume_default.pdf",
       lambda: None if "resume_default.pdf" in str(DEFAULT_RESUME_PATH) else (_ for _ in ()).throw(AssertionError(DEFAULT_RESUME_PATH)))
@@ -179,6 +183,12 @@ check("DEFAULT_PROJECTS_PATH points to projects.json",
 check("OUTPUT_DIR contains 'enhanced'",
       lambda: None if "enhanced" in str(OUTPUT_DIR) else (_ for _ in ()).throw(AssertionError(OUTPUT_DIR)))
 check("DEFAULT_PROVIDER is set", lambda: None if DEFAULT_PROVIDER else (_ for _ in ()).throw(AssertionError("empty")))
+check("OUTPUT_DIR_MD contains 'md'",
+      lambda: None if "md" in str(OUTPUT_DIR_MD) else (_ for _ in ()).throw(AssertionError(OUTPUT_DIR_MD)))
+check("OUTPUT_DIR_DOCX contains 'docx'",
+      lambda: None if "docx" in str(OUTPUT_DIR_DOCX) else (_ for _ in ()).throw(AssertionError(OUTPUT_DIR_DOCX)))
+check("DEFAULT_REFERENCE_DOCX points to resume_template.docx",
+      lambda: None if "resume_template.docx" in str(DEFAULT_REFERENCE_DOCX) else (_ for _ in ()).throw(AssertionError(DEFAULT_REFERENCE_DOCX)))
 
 # ---------------------------------------------------------------------------
 # Default resume and projects files exist

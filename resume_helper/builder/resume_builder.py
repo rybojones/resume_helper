@@ -3,7 +3,11 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from resume_helper.config import DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR
+from resume_helper.config import (
+    DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR,
+    OUTPUT_DIR_MD, OUTPUT_DIR_DOCX, DEFAULT_REFERENCE_DOCX,
+)
+from resume_helper.output.md2docx import check_pandoc_installed, convert_markdown_to_docx
 from resume_helper.parsers.pdf_parser import parse_pdf
 from resume_helper.parsers.job_parser import parse_job_input
 from resume_helper.data.projects_db import load_projects, filter_by_role_tag
@@ -18,6 +22,7 @@ def build_resume(
     role_tag: str | None,
     provider: str,
     output_path: str | None,
+    reference_doc: str | None = None,
 ) -> None:
     # --- Resolve defaults ---
     resolved_resume = Path(resume_path) if resume_path else DEFAULT_RESUME_PATH
@@ -71,6 +76,10 @@ def build_resume(
     # --- Format and write ---
     format_and_write(raw_output, str(resolved_output))
 
+    # --- Convert to DOCX (soft failure) ---
+    ref = Path(reference_doc) if reference_doc else DEFAULT_REFERENCE_DOCX
+    _convert_to_docx(resolved_output, ref)
+
 
 def _preflight_coverage_check(resume_text: str, projects: list) -> None:
     """Warn when none of the project organizations appear in the resume text.
@@ -106,7 +115,24 @@ def _resolve_output_path(output_path: str | None, role_tag: str | None) -> Path:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     suffix = f"_{role_tag}" if role_tag else ""
     filename = f"resume{suffix}_{timestamp}.md"
-    return OUTPUT_DIR / filename
+    OUTPUT_DIR_MD.mkdir(parents=True, exist_ok=True)
+    return OUTPUT_DIR_MD / filename
+
+
+def _resolve_docx_path(md_path: Path) -> Path:
+    OUTPUT_DIR_DOCX.mkdir(parents=True, exist_ok=True)
+    return OUTPUT_DIR_DOCX / md_path.with_suffix(".docx").name
+
+
+def _convert_to_docx(md_path: Path, reference_doc: Path) -> None:
+    docx_path = _resolve_docx_path(md_path)
+    ref = reference_doc if reference_doc.exists() else None
+    try:
+        check_pandoc_installed()
+        convert_markdown_to_docx(str(md_path), str(docx_path), str(ref) if ref else None)
+        print(f"[resume-helper] DOCX written to: {docx_path}", file=sys.stderr)
+    except RuntimeError as exc:
+        print(f"[resume-helper] WARNING: {exc} — skipping DOCX conversion.", file=sys.stderr)
 
 
 def _get_provider(provider: str):

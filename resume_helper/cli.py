@@ -18,6 +18,10 @@ def main() -> None:
                         help=f"Filter projects by role tag. Valid values: {', '.join(ROLE_TAGS)}")
     parser.add_argument("--provider", default=DEFAULT_PROVIDER, help=f"LLM provider (default: {DEFAULT_PROVIDER})")
     parser.add_argument("--output", help="Output file path (auto-named if omitted)")
+    parser.add_argument(
+        "--reference-doc",
+        help="Path to .docx reference template (default: resumes/legacy/resume_template.docx)",
+    )
 
     args = parser.parse_args()
 
@@ -30,6 +34,7 @@ def main() -> None:
         role_tag=args.role,
         provider=args.provider,
         output_path=args.output,
+        reference_doc=args.reference_doc,
     )
 
 
