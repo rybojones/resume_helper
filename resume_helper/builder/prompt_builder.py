@@ -12,15 +12,16 @@ Rules you must follow without exception:
       or rephrase any role, date, organisation, or Focus line.
     - "Project Experience" — dynamic. Replace the entire contents of this section with your
       3 to 5 project selections, tailored to the job posting.
-- Keep all other sections (contact info, Education, Supporting Experience) verbatim.
+- Keep all other sections (contact info, Education, Supporting Experience, etc.) verbatim.
 - Format each selected project as:
     ### <Project Title>
     <One tailored paragraph drawing on the project details and impact, emphasising relevance
     to the job posting.>
-    - <Impact bullet 1>
-    - <Impact bullet 2>  (include only bullets grounded in the input data)
 - End your response with a SELECTION NOTES section explaining which projects you chose,
   which you excluded, and why.
+
+Stylistic rules:
+- Don't use em-dashes, '-', when creating project text.
 
 Output format:
 [Full markdown resume]
