@@ -143,5 +143,5 @@ Verifies imports, config defaults, file existence, and core logic without making
 LLM calls.
 
 ```bash
-/Users/ryanna/Dev/.envs/resume/bin/python smoke_test.py
+python smoke_test.py
 ```
