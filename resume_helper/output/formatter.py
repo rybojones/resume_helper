@@ -3,6 +3,10 @@ import re
 import sys
 from pathlib import Path
 
+from pydantic import ValidationError
+
+from resume_helper.models import ResumeOutput
+
 _NOTES_PATTERN = re.compile(
     r"##?\s*SELECTION NOTES.*$",
     re.IGNORECASE | re.DOTALL,
@@ -22,6 +26,12 @@ def format_and_write(raw_output: str, output_path: str) -> str:
         print("\n" + notes_text.strip(), file=sys.stderr)
     else:
         resume_text = raw_output
+        notes_text = ""
+
+    try:
+        ResumeOutput(resume_markdown=resume_text, selection_notes=notes_text)
+    except ValidationError as exc:
+        print(f"[resume-helper] WARNING: LLM output validation failed — {exc}", file=sys.stderr)
 
     cleaned = _normalize_whitespace(resume_text)
 

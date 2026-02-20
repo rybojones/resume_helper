@@ -27,6 +27,7 @@ def check(name: str, fn):
 # ---------------------------------------------------------------------------
 print("\n-- imports --")
 
+check("models imports", lambda: __import__("resume_helper.models", fromlist=["ProjectRecord", "ProjectsFile", "ResumeOutput"]))
 check("config imports", lambda: __import__("resume_helper.config", fromlist=["PROJECT_ROOT"]))
 check("projects_db imports", lambda: __import__("resume_helper.data.projects_db", fromlist=["load_projects"]))
 check("pdf_parser imports", lambda: __import__("resume_helper.parsers.pdf_parser", fromlist=["parse_pdf"]))
@@ -40,6 +41,50 @@ check("formatter imports", lambda: __import__("resume_helper.output.formatter", 
 check("import_projects.extractor imports", lambda: __import__("resume_helper.import_projects.extractor", fromlist=["extract_projects"]))
 check("import_projects.coverage_check imports", lambda: __import__("resume_helper.import_projects.coverage_check", fromlist=["check_coverage"]))
 check("import_projects.cli imports", lambda: __import__("resume_helper.import_projects.cli", fromlist=["main"]))
+
+# ---------------------------------------------------------------------------
+# Models
+# ---------------------------------------------------------------------------
+print("\n-- models --")
+
+from pydantic import ValidationError
+from resume_helper.models import ProjectRecord, ResumeOutput
+
+_WELL_FORMED_RESUME = (
+    "# Jane Smith\n\n"
+    "## Work Experience\nSome Corp 2020–2022\n\n"
+    "## Project Experience\n### Cool Project\nDid cool things.\n"
+)
+
+check("ResumeOutput validates well-formed resume",
+      lambda: ResumeOutput(resume_markdown=_WELL_FORMED_RESUME))
+
+def _resume_output_missing_sections():
+    try:
+        ResumeOutput(resume_markdown="# Jane Smith\n\nNo sections here.")
+        raise AssertionError("should have raised ValidationError")
+    except ValidationError:
+        pass
+
+check("ResumeOutput raises ValidationError when sections missing", _resume_output_missing_sections)
+
+def _project_record_bad_role_tags():
+    try:
+        ProjectRecord(title="Test", summary="s", skills=[], role_tags=["not_a_real_tag"], impact=[])
+        raise AssertionError("should have raised ValidationError")
+    except ValidationError:
+        pass
+
+check("ProjectRecord rejects invalid role_tags", _project_record_bad_role_tags)
+
+def _project_record_empty_role_tags():
+    try:
+        ProjectRecord(title="Test", summary="s", skills=[], role_tags=[], impact=[])
+        raise AssertionError("should have raised ValidationError")
+    except ValidationError:
+        pass
+
+check("ProjectRecord rejects empty role_tags", _project_record_empty_role_tags)
 
 # ---------------------------------------------------------------------------
 # Config defaults

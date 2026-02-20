@@ -3,7 +3,7 @@ import argparse
 import sys
 
 from resume_helper.config import DEFAULT_PROVIDER
-from resume_helper.data.projects_db import ROLE_TAGS
+from resume_helper.models import ROLE_TAGS
 
 
 def main() -> None:

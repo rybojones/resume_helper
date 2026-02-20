@@ -3,55 +3,9 @@ import json
 import re
 from pathlib import Path
 
-import jsonschema
+from pydantic import ValidationError
 
-ROLE_TAGS = [
-    "data_scientist",
-    "machine_learning_engineer",
-    "analytics_engineer",
-    "ai_engineer",
-    "data_analyst",
-    "data_engineer",
-]
-
-_PROJECT_SCHEMA = {
-    "type": "object",
-    "required": ["projects"],
-    "properties": {
-        "projects": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": ["id", "title", "summary", "skills", "role_tags", "impact"],
-                "properties": {
-                    "id":                  {"type": "string"},
-                    "title":               {"type": "string"},
-                    "organization":        {"type": "string"},
-                    "dates": {
-                        "type": "object",
-                        "properties": {
-                            "start": {"type": "string"},
-                            "end":   {"type": "string"},
-                        },
-                    },
-                    "summary":             {"type": "string"},
-                    "description_long":    {"type": "string"},
-                    "role":                {"type": "string"},
-                    "skills":              {"type": "array", "items": {"type": "string"}},
-                    "role_tags":           {
-                        "type": "array",
-                        "items": {"type": "string", "enum": ROLE_TAGS},
-                        "minItems": 1,
-                    },
-                    "impact":              {"type": "array", "items": {"type": "string"}},
-                    "keywords":            {"type": "array", "items": {"type": "string"}},
-                    "include_by_default":  {"type": "boolean"},
-                    "notes":               {"type": "string"},
-                },
-            },
-        }
-    },
-}
+from resume_helper.models import ROLE_TAGS, ProjectsFile
 
 
 def load_projects(path: str) -> list:
@@ -64,11 +18,11 @@ def load_projects(path: str) -> list:
         data = json.load(f)
 
     try:
-        jsonschema.validate(data, _PROJECT_SCHEMA)
-    except jsonschema.ValidationError as exc:
-        raise ValueError(f"projects.json validation error: {exc.message}") from exc
+        validated = ProjectsFile.model_validate(data)
+    except ValidationError as exc:
+        raise ValueError(f"projects.json validation error: {exc}") from exc
 
-    return data["projects"]
+    return [p.model_dump() for p in validated.projects]
 
 
 def merge_projects(existing: list, new_projects: list, projects_path: str) -> tuple[int, list]:
@@ -76,8 +30,15 @@ def merge_projects(existing: list, new_projects: list, projects_path: str) -> tu
 
     Deduplication key: (title, organization) — case-insensitive.
     Auto-generates IDs for incoming projects that lack them.
+    Accepts new_projects as dicts or ProjectRecord instances.
     Returns (count_added, merged_list).
     """
+    # Normalize ProjectRecord instances to dicts
+    normalized = [
+        p.model_dump() if hasattr(p, "model_dump") else p
+        for p in new_projects
+    ]
+
     seen = {
         (_norm(p.get("title", "")), _norm(p.get("organization", "")))
         for p in existing
@@ -88,7 +49,7 @@ def merge_projects(existing: list, new_projects: list, projects_path: str) -> tu
 
     added = 0
     merged = list(existing)
-    for proj in new_projects:
+    for proj in normalized:
         key = (_norm(proj.get("title", "")), _norm(proj.get("organization", "")))
         if key in seen:
             continue
