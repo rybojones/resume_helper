@@ -13,25 +13,18 @@ dist/
 build/
 .eggs/
 
-# Projects database
-data/projects.json
-
-# Provided resume input
-resumes/legacy/*
-!resumes/legacy/pandoc_template.docx
-
-# Generated resume output
+# Generated resume output (legacy top-level paths)
 resumes/enhanced/*.md
 resumes/enhanced/*.pdf
 resumes/enhanced/md/
 resumes/enhanced/docx/
 
 # Multi-user personal data (jayne_dough is the committed template profile)
-users/*/resume_default.pdf
-!users/jayne_dough/resume_default.pdf
 users/*/projects.json
 !users/jayne_dough/projects.json
-users/*/resumes/
+users/*/resumes/enhanced/
+users/*/resumes/legacy/*
+!users/jayne_dough/resumes/legacy/resume_default.pdf
 
 # macOS
 .DS_Store
