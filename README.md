@@ -1,58 +1,71 @@
 # Resume Helper
 
-A CLI tool that tailors a resume to a job posting using an LLM. It selects the most
-relevant projects from a master projects database and rewrites them to match the target
-role, while leaving all other resume sections untouched.
+A CLI tool that tailors your resume to a specific job posting using AI. It selects the most
+relevant projects from your projects database and rewrites them to match the target role,
+while leaving all other resume sections untouched.
 
 ---
 
 ## Setup
 
-1. **Activate the venv**
-
-   ```bash
-   source /Users/ryanna/Dev/.envs/resume/bin/activate
-   # or: activate resume  (if you have a shell alias)
-   ```
-
-2. **Install dependencies**
+1. **Install dependencies**
 
    ```bash
    pip install -e .
    ```
 
-3. **Configure your API key**
+2. **Configure your API key**
+
+   Copy the example environment file and add your key:
 
    ```bash
    cp .env.example .env
-   # Edit .env and add your key — GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY
    ```
 
-4. **Create projects.json database**
+   Open `.env` and fill in one of: `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, or `OPENAI_API_KEY`.
 
-  ```bash
-  cp data/projects_empty.json data/projects.json
-  # Add your projects to projects.json manually or using resume_helper.import_projects
-  ```
+3. **Create your projects database**
+
+   ```bash
+   cp data/projects_empty.json data/projects.json
+   ```
+
+   Then add your projects to `data/projects.json`. You can do this manually or use the importer (see below).
 
 ---
 
 ## Resume format
 
-The base resume (`resumes/legacy/resume_default.pdf`) uses a two-section format:
+Resume Helper expects your base resume as a PDF at `resumes/legacy/resume_default.pdf`.
+See `resumes/legacy/resume_template.pdf` for an example of the expected layout and sections.
 
-- **Work Experience** — static condensed list of roles (title, org, dates, Focus keywords).
-  The LLM reproduces this section verbatim.
-- **Project Experience** — dynamic. The LLM replaces this entire section with 3–5 projects
-  selected from `data/projects.json`, tailored to the job posting.
+Your resume should use this two-section structure:
 
-All other sections (Education, Supporting Experience) are also preserved verbatim.
+- **Work Experience** — a condensed list of roles (title, org, dates, focus keywords).
+  The AI reproduces this section verbatim.
+- **Project Experience** — replaced entirely by the AI with 3–5 projects selected from
+  your `data/projects.json`, tailored to the job posting.
+
+All other sections (Education, Supporting Experience, etc.) are preserved as-is.
+
+> **Note:** `resume_default.pdf` is excluded from version control — it contains your personal
+> information and should not be committed.
 
 ---
 
 ## Usage
 
 ### Build a tailored resume
+
+Run the tool with a job posting URL or pasted job description:
+
+```bash
+python -m resume_helper --job "https://jobs.example.com/ds-role"
+```
+
+Output is saved automatically to `resumes/enhanced/` and named by company, role, and date.
+
+**All options:**
 
 ```bash
 python -m resume_helper \
@@ -63,8 +76,6 @@ python -m resume_helper \
   --provider gemini \                            # optional; defaults to gemini
   --output resumes/enhanced/tailored_resume.md   # optional; auto-named if omitted
 ```
-
-Output is written to `resumes/enhanced/` as a markdown file.
 
 **`--job` accepts a URL or raw text.** URL scraping works for public job postings
 (Ashby, Lever, Greenhouse, etc.). Pages behind a login wall (LinkedIn, Workday SSO)
@@ -82,9 +93,16 @@ python -m resume_helper --job "$(pbpaste)"   # macOS: paste from clipboard
 
 ### Import projects from a resume PDF
 
-Extracts projects from a legacy resume PDF using an LLM and merges them into
-`data/projects.json`. Runs a semantic coverage check after import to flag any
-work experience that may not have been captured.
+If you have an existing resume PDF, this command extracts the projects from it and merges
+them into your `data/projects.json` automatically.
+
+```bash
+python -m resume_helper.import_projects --resume resumes/legacy/resume_default.pdf
+```
+
+Re-running is safe — duplicates are detected by title and organization, so only new entries are added.
+
+**All options:**
 
 ```bash
 python -m resume_helper.import_projects \
@@ -93,15 +111,12 @@ python -m resume_helper.import_projects \
   --provider gemini                              # optional; defaults to gemini
 ```
 
-Re-running is safe — existing projects are deduplicated by title + organization
-(case-insensitive). Only genuinely new entries are added.
-
 ---
 
 ## Projects database
 
-`data/projects.json` is the master list of projects the LLM selects from.
-See `data/example_projects.json` for annotated examples of the schema.
+`data/projects.json` is the master list of projects the AI selects from when building your resume.
+See `data/example_projects.json` for annotated examples of the expected format.
 
 Key fields per project:
 
@@ -115,7 +130,7 @@ Key fields per project:
 | `impact` | yes | Measurable outcomes |
 | `organization` | no | Employer / client name |
 | `dates` | no | `{ "start": "YYYY-MM", "end": "YYYY-MM" }` |
-| `description_long` | no | Full context paragraph for richer LLM output |
+| `description_long` | no | Full context paragraph for richer AI output |
 | `keywords` | no | Domain keywords for matching |
 
 ---
@@ -125,10 +140,12 @@ Key fields per project:
 ```
 resume_helper/
 ├── resumes/
-│   ├── legacy/                  # Input resumes (resume_default.pdf lives here)
-│   └── enhanced/                # Output tailored resumes written here
+│   ├── legacy/                  # Your input resume lives here
+│   │   ├── resume_template.pdf  # Blank template showing expected format and sections
+│   │   └── resume_default.pdf   # Your resume (not committed — add your own)
+│   └── enhanced/                # Tailored resumes are written here
 ├── data/
-│   ├── projects.json            # Master projects database (may start empty)
+│   ├── projects.json            # Your projects database (not committed)
 │   └── example_projects.json   # Annotated schema examples for reference
 ├── resume_helper/               # Main Python package
 │   ├── builder/                 # Prompt assembly + orchestration
@@ -147,7 +164,7 @@ resume_helper/
 ## Smoke test
 
 Verifies imports, config defaults, file existence, and core logic without making any
-LLM calls.
+AI calls.
 
 ```bash
 python smoke_test.py

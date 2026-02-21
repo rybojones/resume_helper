@@ -19,6 +19,7 @@ data/projects.json
 # Provided resume input
 resumes/legacy/*
 !resumes/legacy/pandoc_template.docx
+!resumes/legacy/resume_template.pdf
 
 # Generated resume output
 resumes/enhanced/*.md
