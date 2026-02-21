@@ -19,13 +19,19 @@ data/projects.json
 # Provided resume input
 resumes/legacy/*
 !resumes/legacy/pandoc_template.docx
-!resumes/legacy/resume_template.pdf
 
 # Generated resume output
 resumes/enhanced/*.md
 resumes/enhanced/*.pdf
 resumes/enhanced/md/
 resumes/enhanced/docx/
+
+# Multi-user personal data (jayne_dough is the committed template profile)
+users/*/resume_default.pdf
+!users/jayne_dough/resume_default.pdf
+users/*/projects.json
+!users/jayne_dough/projects.json
+users/*/resumes/
 
 # macOS
 .DS_Store

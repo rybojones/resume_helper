@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from resume_helper.config import DEFAULT_PROVIDER
+from resume_helper.config import DEFAULT_PROVIDER, resolve_user_paths
 from resume_helper.models import ROLE_TAGS
 
 
@@ -22,8 +22,11 @@ def main() -> None:
         "--reference-doc",
         help="Path to .docx reference template (default: resumes/legacy/resume_template.docx)",
     )
+    parser.add_argument("--user", help="Your user profile name (or set RESUME_HELPER_USER env var)")
 
     args = parser.parse_args()
+
+    user_paths = resolve_user_paths(args.user)
 
     # Import here to keep startup fast and allow stubs during scaffold
     from resume_helper.builder.resume_builder import build_resume  # noqa: F401
@@ -35,6 +38,7 @@ def main() -> None:
         provider=args.provider,
         output_path=args.output,
         reference_doc=args.reference_doc,
+        user_paths=user_paths,
     )
 
 

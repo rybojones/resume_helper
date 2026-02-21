@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from resume_helper.config import DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, DEFAULT_PROVIDER
+from resume_helper.config import DEFAULT_PROVIDER, resolve_user_paths
 from resume_helper.parsers.pdf_parser import parse_pdf
 from resume_helper.data.projects_db import load_projects, merge_projects
 from resume_helper.import_projects.extractor import extract_projects
@@ -17,25 +17,30 @@ def main() -> None:
     )
     parser.add_argument(
         "--resume",
-        default=str(DEFAULT_RESUME_PATH),
-        help=f"Path to resume PDF (default: {DEFAULT_RESUME_PATH})",
+        default=None,
+        help="Path to resume PDF (default: user profile resume)",
     )
     parser.add_argument(
         "--projects",
-        default=str(DEFAULT_PROJECTS_PATH),
-        help=f"Path to projects.json (default: {DEFAULT_PROJECTS_PATH})",
+        default=None,
+        help="Path to projects.json (default: user profile projects)",
     )
     parser.add_argument(
         "--provider",
         default=DEFAULT_PROVIDER,
         help=f"LLM provider (default: {DEFAULT_PROVIDER})",
     )
+    parser.add_argument("--user", help="Your user profile name (or set RESUME_HELPER_USER env var)")
     args = parser.parse_args()
 
+    user_paths = resolve_user_paths(args.user)
+    effective_resume   = args.resume   or str(user_paths.resume)
+    effective_projects = args.projects or str(user_paths.projects)
+
     # --- Parse resume ---
-    print(f"[import-projects] Parsing resume: {args.resume}", file=sys.stderr)
+    print(f"[import-projects] Parsing resume: {effective_resume}", file=sys.stderr)
     try:
-        resume_text = parse_pdf(args.resume)
+        resume_text = parse_pdf(effective_resume)
     except FileNotFoundError as exc:
         print(f"[import-projects] ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
@@ -55,7 +60,7 @@ def main() -> None:
 
     # --- Load existing ---
     try:
-        existing = load_projects(args.projects)
+        existing = load_projects(effective_projects)
     except FileNotFoundError:
         existing = []
 
@@ -70,10 +75,10 @@ def main() -> None:
         truly_new, updated_existing = list(new_projects), []
 
     # --- Merge new into database ---
-    added, merged = merge_projects(updated_existing, truly_new, args.projects)
+    added, merged = merge_projects(updated_existing, truly_new, effective_projects)
 
     print(f"[import-projects] Added {added} new project(s). Total: {len(merged)}.", file=sys.stderr)
-    print(f"[import-projects] projects.json updated: {args.projects}", file=sys.stderr)
+    print(f"[import-projects] projects.json updated: {effective_projects}", file=sys.stderr)
 
     # --- LLM coverage check ---
     print("[import-projects] Checking coverage...", file=sys.stderr)

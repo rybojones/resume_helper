@@ -6,6 +6,7 @@ from pathlib import Path
 from resume_helper.config import (
     DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR,
     OUTPUT_DIR_MD, OUTPUT_DIR_DOCX, DEFAULT_REFERENCE_DOCX,
+    UserPaths,
 )
 from resume_helper.output.md2docx import check_pandoc_installed, convert_markdown_to_docx
 from resume_helper.parsers.pdf_parser import parse_pdf
@@ -23,10 +24,14 @@ def build_resume(
     provider: str,
     output_path: str | None,
     reference_doc: str | None = None,
+    user_paths: UserPaths | None = None,
 ) -> None:
     # --- Resolve defaults ---
-    resolved_resume = Path(resume_path) if resume_path else DEFAULT_RESUME_PATH
-    resolved_projects = Path(projects_path) if projects_path else DEFAULT_PROJECTS_PATH
+    _p = user_paths
+    resolved_resume   = Path(resume_path)   if resume_path   else (_p.resume    if _p else DEFAULT_RESUME_PATH)
+    resolved_projects = Path(projects_path) if projects_path else (_p.projects  if _p else DEFAULT_PROJECTS_PATH)
+    _out_md           = _p.output_dir_md   if _p else OUTPUT_DIR_MD
+    _out_docx         = _p.output_dir_docx if _p else OUTPUT_DIR_DOCX
 
     # --- Parse base resume (optional) ---
     if resolved_resume.exists():
@@ -71,7 +76,7 @@ def build_resume(
     raw_output = llm.complete(system_prompt, user_prompt)
 
     # --- Resolve output path ---
-    resolved_output = _resolve_output_path(output_path, role_tag)
+    resolved_output = _resolve_output_path(output_path, role_tag, _out_md)
 
     # --- Format and write ---
     result = format_and_write(raw_output, str(resolved_output))
@@ -82,7 +87,7 @@ def build_resume(
 
     # --- Convert to DOCX (soft failure) ---
     ref = Path(reference_doc) if reference_doc else DEFAULT_REFERENCE_DOCX
-    _convert_to_docx(resolved_output, ref)
+    _convert_to_docx(resolved_output, ref, _out_docx)
 
 
 def _preflight_coverage_check(resume_text: str, projects: list) -> None:
@@ -120,14 +125,18 @@ def _slugify(text: str) -> str:
     return slug[:40]
 
 
-def _resolve_output_path(output_path: str | None, role_tag: str | None) -> Path:
+def _resolve_output_path(
+    output_path: str | None,
+    role_tag: str | None,
+    output_dir_md: Path = OUTPUT_DIR_MD,
+) -> Path:
     if output_path:
         return Path(output_path)
     datestamp = datetime.now().strftime("%Y%m%d")
     suffix = f"_{role_tag}" if role_tag else ""
     filename = f"resume{suffix}_{datestamp}.md"
-    OUTPUT_DIR_MD.mkdir(parents=True, exist_ok=True)
-    return OUTPUT_DIR_MD / filename
+    output_dir_md.mkdir(parents=True, exist_ok=True)
+    return output_dir_md / filename
 
 
 def _rename_with_metadata(current_path: Path, company: str, role: str) -> Path:
@@ -143,13 +152,13 @@ def _rename_with_metadata(current_path: Path, company: str, role: str) -> Path:
     return new_path
 
 
-def _resolve_docx_path(md_path: Path) -> Path:
-    OUTPUT_DIR_DOCX.mkdir(parents=True, exist_ok=True)
-    return OUTPUT_DIR_DOCX / md_path.with_suffix(".docx").name
+def _resolve_docx_path(md_path: Path, output_dir_docx: Path = OUTPUT_DIR_DOCX) -> Path:
+    output_dir_docx.mkdir(parents=True, exist_ok=True)
+    return output_dir_docx / md_path.with_suffix(".docx").name
 
 
-def _convert_to_docx(md_path: Path, reference_doc: Path) -> None:
-    docx_path = _resolve_docx_path(md_path)
+def _convert_to_docx(md_path: Path, reference_doc: Path, output_dir_docx: Path = OUTPUT_DIR_DOCX) -> None:
+    docx_path = _resolve_docx_path(md_path, output_dir_docx)
     ref = reference_doc if reference_doc.exists() else None
     try:
         check_pandoc_installed()
