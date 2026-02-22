@@ -13,18 +13,9 @@ dist/
 build/
 .eggs/
 
-# Generated resume output (legacy top-level paths)
-resumes/enhanced/*.md
-resumes/enhanced/*.pdf
-resumes/enhanced/md/
-resumes/enhanced/docx/
-
-# Multi-user personal data (jayne_dough is the committed template profile)
-users/*/projects.json
-!users/jayne_dough/projects.json
-users/*/resumes/enhanced/
-users/*/resumes/legacy/*
-!users/jayne_dough/resumes/legacy/resume_default.pdf
+# Personal user profiles (gitignored); jayne_dough is the committed template
+users/*/
+!users/jayne_dough/
 
 # macOS
 .DS_Store
