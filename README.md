@@ -8,13 +8,32 @@ while leaving all other resume sections untouched.
 
 ## Getting started
 
-1. **Install dependencies**
+1. **Install Homebrew dependencies**
+
+   ```bash
+   brew install pandoc
+   ```
+
+   > Don't have Homebrew? Install it from [brew.sh](https://brew.sh).
+
+2. **Create and activate a virtual environment**
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   ```
+
+   > The `resume-helper-*` commands are installed into the venv's `bin/`. They won't be
+   > found in your terminal unless the venv is active. Add the `source` line to your
+   > `~/.zshrc` (or `~/.bashrc`) to activate it automatically for this project.
+
+3. **Install dependencies**
 
    ```bash
    pip install -e .
    ```
 
-2. **Configure your API key**
+4. **Configure your API key**
 
    ```bash
    cp .env.example .env
@@ -22,16 +41,16 @@ while leaving all other resume sections untouched.
 
    Open `.env` and fill in one of: `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, or `OPENAI_API_KEY`.
 
-3. **Create your user profile**
+5. **Create your user profile**
 
-  ```bash
-  resume-helper-init
-  ```
+   ```bash
+   resume-helper-init
+   ```
 
-  Follow the prompt to enter your profile name (e.g. `cole_lagreggor`). This creates
-  `users/<your-name>/` with the expected directory structure and an empty `projects.json`.
+   Follow the prompt to enter your profile name (e.g. `jane_smith`). This creates
+   `users/<your-name>/` with the expected directory structure and an empty `projects.json`.
 
-4. **Drop in your resume PDF**
+6. **Drop in your resume PDF**
 
    Copy your resume to:
 
@@ -43,13 +62,13 @@ while leaving all other resume sections untouched.
    layout and sections. The structure consists of separate work experience and project experience
    sections. If your resume doesn't follow this pattern there may be _"quirky"_ output behavior.
 
-5. **Import projects** *(optional — skip if you'll edit `projects.json` manually)*
+7. **Import projects** *(optional — skip if you'll edit `projects.json` manually)*
 
    ```bash
    resume-helper-import-projects --user <your-name>
    ```
 
-6. **Set your active user** *(recommended — avoids typing `--user` every time)*
+8. **Set your active user** *(recommended — avoids typing `--user` every time)*
 
    ```bash
    export RESUME_HELPER_USER=<your-name>
