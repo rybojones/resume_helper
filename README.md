@@ -8,7 +8,7 @@ while leaving all other resume sections untouched.
 
 ## Getting started
 
-1. **Install Homebrew dependencies**
+1. **Install pandoc file-type conversion tool**
 
    ```bash
    brew install pandoc

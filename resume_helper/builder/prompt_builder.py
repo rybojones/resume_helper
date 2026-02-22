@@ -13,6 +13,8 @@ Rules you must follow without exception:
     - "Project Experience" — dynamic. Replace the entire contents of this section with your
       4 to 7 project selections, tailored to the job posting. Don't include company name where work was done.
       Order projects from most relevant to least (using your discretion).
+- For the Project Experience section, select ONLY from the CANDIDATE PROJECTS list provided.
+  Do not source any project content from the BASE RESUME section.
 - Keep all other sections (contact info, Education, Supporting Experience, etc.) verbatim.
 - Format each selected project as:
     ### <Project Title>
@@ -70,7 +72,7 @@ def build_prompt(base_resume_text: str | None, job_text: str, projects: list) ->
         "1. Reproduce the Work Experience section exactly as it appears — every role, date, "
         "organisation, and Focus line verbatim.\n"
         "2. Replace the Project Experience section with 3 to 5 projects from CANDIDATE PROJECTS "
-        "that best match the job posting.\n"
+        "that best match the job posting. Select ONLY from CANDIDATE PROJECTS — never from BASE RESUME.\n"
         "3. Rewrite each selected project as: ### title, one tailored paragraph, \n"
         "4. Keep Education and Supporting Experience verbatim.\n"
         "5. Do not add any experience, skills, or credentials not present in the inputs.\n"

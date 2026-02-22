@@ -90,30 +90,84 @@ def build_resume(
     _convert_to_docx(resolved_output, ref, _out_docx)
 
 
-def _preflight_coverage_check(resume_text: str, projects: list) -> None:
-    """Warn when none of the project organizations appear in the resume text.
+def _extract_project_titles(resume_text: str) -> list[str]:
+    """Return candidate project titles from the 'Project Experience' section of a resume.
 
-    This is a lightweight heuristic: if projects.json has entries but none of their
-    organization names are found in the resume, the DB likely doesn't cover this resume.
+    Finds the section, cuts off at the next major heading, then returns short standalone
+    lines (< 70 chars, 2+ words, not ending in punctuation) as candidate titles.
+    """
+    import re
+    # Find the start of 'Project Experience'
+    section_match = re.search(r"(?im)^project experience\s*$", resume_text)
+    if not section_match:
+        return []
+
+    section_text = resume_text[section_match.end():]
+
+    # Cut off at the next major section heading (Education, Supporting Experience, Work Experience, etc.)
+    next_section = re.search(
+        r"(?im)^(education|supporting experience|work experience|skills|certifications|awards|publications)\s*$",
+        section_text,
+    )
+    if next_section:
+        section_text = section_text[: next_section.start()]
+
+    titles = []
+    for line in section_text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        # Skip lines that are too long, single words, or look like body text (end in . , :)
+        if len(line) >= 70:
+            continue
+        if line[-1] in ".,:":
+            continue
+        words = line.split()
+        if len(words) < 2:
+            continue
+        titles.append(line)
+    return titles
+
+
+def _preflight_coverage_check(resume_text: str, projects: list) -> None:
+    """Warn when resume projects are absent from projects.json.
+
+    Extracts project titles from the resume's 'Project Experience' section and
+    checks each against the titles in projects.json (case-insensitive substring
+    match). Prints an itemised warning for any uncovered titles.
     Advisory only — build continues regardless.
     """
-    orgs = [p.get("organization", "").strip() for p in projects if p.get("organization")]
-    if not orgs:
-        # No org data to compare — warn if projects list is also empty
-        if not projects:
-            print(
-                "[resume-helper] WARNING: Some roles in your resume may not be represented in projects.json.\n"
-                "[resume-helper] Run `python -m resume_helper.import_projects` to extract and import them.",
-                file=sys.stderr,
-            )
+    if not projects:
+        print(
+            "[resume-helper] WARNING: projects.json is empty — no projects will be selected.\n"
+            "[resume-helper] Run `resume-helper-import-projects` to add projects.",
+            file=sys.stderr,
+        )
         return
 
-    resume_lower = resume_text.lower()
-    covered = any(org.lower() in resume_lower for org in orgs)
-    if not covered:
+    resume_titles = _extract_project_titles(resume_text)
+    if not resume_titles:
+        # Can't parse section — skip silently
+        return
+
+    db_titles = [p.get("title", "").lower() for p in projects]
+
+    uncovered = []
+    for title in resume_titles:
+        title_lower = title.lower()
+        if not any(title_lower in db_t or db_t in title_lower for db_t in db_titles):
+            uncovered.append(title)
+
+    if uncovered:
         print(
-            "[resume-helper] WARNING: Some roles in your resume may not be represented in projects.json.\n"
-            "[resume-helper] Run `python -m resume_helper.import_projects` to extract and import them.",
+            f"[resume-helper] WARNING: {len(uncovered)} project(s) in your resume are not in "
+            "projects.json and will not be used:",
+            file=sys.stderr,
+        )
+        for t in uncovered:
+            print(f'[resume-helper]   - "{t}"', file=sys.stderr)
+        print(
+            "[resume-helper] Run `resume-helper-import-projects` to add them.",
             file=sys.stderr,
         )
 

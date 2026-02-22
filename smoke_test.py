@@ -373,6 +373,65 @@ def _list_users_check():
 check("list_users output includes jayne_dough", _list_users_check)
 
 # ---------------------------------------------------------------------------
+# prompt constraint
+# ---------------------------------------------------------------------------
+print("\n-- prompt constraint --")
+
+check("SYSTEM_PROMPT forbids using BASE RESUME for projects",
+      lambda: None if "CANDIDATE PROJECTS" in SYSTEM_PROMPT and "BASE RESUME" in SYSTEM_PROMPT
+      else (_ for _ in ()).throw(AssertionError("constraint missing")))
+
+# ---------------------------------------------------------------------------
+# preflight coverage check
+# ---------------------------------------------------------------------------
+print("\n-- preflight coverage check --")
+
+from resume_helper.builder.resume_builder import _extract_project_titles, _preflight_coverage_check
+
+
+def _extract_titles_check():
+    sample = (
+        "Work Experience\nSome Corp 2020–2022\n\n"
+        "Project Experience\nML Pipeline\nBuilt a pipeline...\n\n"
+        "Data Warehouse Migration\nMigrated the warehouse...\n\n"
+        "Education\nUniversity of..."
+    )
+    titles = _extract_project_titles(sample)
+    assert "ML Pipeline" in titles, f"expected 'ML Pipeline' in {titles}"
+    assert "Data Warehouse Migration" in titles, f"expected 'Data Warehouse Migration' in {titles}"
+
+
+check("_extract_project_titles finds titles in Project Experience section", _extract_titles_check)
+
+
+def _preflight_no_warning_when_covered():
+    import io
+    import contextlib
+    projects = [{"title": "ML Pipeline", "organization": "Acme"}]
+    resume = "Project Experience\nML Pipeline\nDid stuff.\n\nEducation\n..."
+    buf = io.StringIO()
+    with contextlib.redirect_stderr(buf):
+        _preflight_coverage_check(resume, projects)
+    assert "WARNING" not in buf.getvalue(), "should not warn when project is covered"
+
+
+check("_preflight_coverage_check no warning when project covered", _preflight_no_warning_when_covered)
+
+
+def _preflight_warns_when_uncovered():
+    import io
+    import contextlib
+    projects = [{"title": "Other Project", "organization": "Acme"}]
+    resume = "Project Experience\nML Pipeline\nDid stuff.\n\nEducation\n..."
+    buf = io.StringIO()
+    with contextlib.redirect_stderr(buf):
+        _preflight_coverage_check(resume, projects)
+    assert "ML Pipeline" in buf.getvalue(), "should warn about uncovered project"
+
+
+check("_preflight_coverage_check warns when project uncovered", _preflight_warns_when_uncovered)
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 total = len(_PASS) + len(_FAIL)
