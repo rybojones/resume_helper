@@ -53,6 +53,13 @@ def build_resume(
     # --- Parse job posting ---
     print("[resume-helper] Fetching job posting...", file=sys.stderr)
     job_text = parse_job_input(job_input)
+    if not job_text.strip():
+        print(
+            "[resume-helper] ERROR: Could not extract job posting content from the provided URL.\n"
+            "[resume-helper] Try pasting the job description as raw text instead.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     # --- Load and filter projects ---
     print(f"[resume-helper] Loading projects: {resolved_projects}", file=sys.stderr)
