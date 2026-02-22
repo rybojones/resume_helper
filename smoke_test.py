@@ -43,6 +43,8 @@ check("md2docx imports", lambda: __import__("resume_helper.output.md2docx", from
 check("import_projects.extractor imports", lambda: __import__("resume_helper.import_projects.extractor", fromlist=["extract_projects"]))
 check("import_projects.coverage_check imports", lambda: __import__("resume_helper.import_projects.coverage_check", fromlist=["check_coverage"]))
 check("import_projects.cli imports", lambda: __import__("resume_helper.import_projects.cli", fromlist=["main"]))
+check("init_user imports", lambda: __import__("resume_helper.init_user", fromlist=["main"]))
+check("list_users imports", lambda: __import__("resume_helper.list_users", fromlist=["main"]))
 
 # ---------------------------------------------------------------------------
 # Models
@@ -330,6 +332,45 @@ check("_slugify lowercases and replaces non-alphanumeric with underscores",
 check("_slugify caps output at 40 chars",
       lambda: None if len(_slugify("x" * 100)) <= 40
       else (_ for _ in ()).throw(AssertionError(len(_slugify("x" * 100)))))
+
+# ---------------------------------------------------------------------------
+# User management
+# ---------------------------------------------------------------------------
+print("\n-- user management --")
+
+from resume_helper.config import ensure_user_dirs, UserPaths
+
+
+def _ensure_dirs_check():
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        paths = UserPaths(
+            resume=Path(tmp) / "resumes" / "legacy" / "resume_default.pdf",
+            projects=Path(tmp) / "projects.json",
+            output_dir_md=Path(tmp) / "resumes" / "enhanced" / "md",
+            output_dir_docx=Path(tmp) / "resumes" / "enhanced" / "docx",
+        )
+        ensure_user_dirs(paths)
+        assert paths.resume.parent.exists(), "legacy/ dir not created"
+        assert paths.output_dir_md.exists(), "md/ dir not created"
+        assert paths.output_dir_docx.exists(), "docx/ dir not created"
+        assert not paths.projects.exists(), "projects.json should NOT be created by ensure_user_dirs"
+
+
+check("ensure_user_dirs creates dirs but not projects.json", _ensure_dirs_check)
+
+
+def _list_users_check():
+    import io
+    import contextlib
+    from resume_helper.list_users import main as list_main
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        list_main()
+    assert "jayne_dough" in buf.getvalue()
+
+
+check("list_users output includes jayne_dough", _list_users_check)
 
 # ---------------------------------------------------------------------------
 # Summary

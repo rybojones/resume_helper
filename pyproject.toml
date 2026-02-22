@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "resume-helper"
@@ -24,6 +24,8 @@ dependencies = [
 [project.scripts]
 resume-helper = "resume_helper.cli:main"
 resume-helper-import-projects = "resume_helper.import_projects.cli:main"
+resume-helper-init = "resume_helper.init_user:main"
+resume-helper-users = "resume_helper.list_users:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

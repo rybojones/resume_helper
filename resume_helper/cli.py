@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from resume_helper.config import DEFAULT_PROVIDER, resolve_user_paths
+from resume_helper.config import DEFAULT_PROVIDER, resolve_user_paths, ensure_user_dirs
 from resume_helper.models import ROLE_TAGS
 
 
@@ -27,6 +27,7 @@ def main() -> None:
     args = parser.parse_args()
 
     user_paths = resolve_user_paths(args.user)
+    ensure_user_dirs(user_paths)
 
     # Import here to keep startup fast and allow stubs during scaffold
     from resume_helper.builder.resume_builder import build_resume  # noqa: F401

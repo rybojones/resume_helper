@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from resume_helper.config import DEFAULT_PROVIDER, resolve_user_paths
+from resume_helper.config import DEFAULT_PROVIDER, resolve_user_paths, ensure_user_dirs
 from resume_helper.parsers.pdf_parser import parse_pdf
 from resume_helper.data.projects_db import load_projects, merge_projects
 from resume_helper.import_projects.extractor import extract_projects
@@ -34,6 +34,7 @@ def main() -> None:
     args = parser.parse_args()
 
     user_paths = resolve_user_paths(args.user)
+    ensure_user_dirs(user_paths)
     effective_resume   = args.resume   or str(user_paths.resume)
     effective_projects = args.projects or str(user_paths.projects)
 

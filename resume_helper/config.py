@@ -42,3 +42,10 @@ def resolve_user_paths(user: str | None = None) -> UserPaths:
         output_dir_md=root / "resumes" / "enhanced" / "md",
         output_dir_docx=root / "resumes" / "enhanced" / "docx",
     )
+
+
+def ensure_user_dirs(paths: UserPaths) -> None:
+    """Create per-user output directories if they don't exist. Does not create projects.json."""
+    paths.resume.parent.mkdir(parents=True, exist_ok=True)   # resumes/legacy/
+    paths.output_dir_md.mkdir(parents=True, exist_ok=True)
+    paths.output_dir_docx.mkdir(parents=True, exist_ok=True)
