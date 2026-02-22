@@ -10,6 +10,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         prog="resume-helper",
         description="Tailor a resume to a job posting using an LLM.",
+        epilog="See also: resume-helper-init  resume-helper-users  resume-helper-import-projects",
     )
     parser.add_argument("--resume", help="Path to base resume PDF (default: resumes/legacy/default_resume.pdf)")
     parser.add_argument("--job", required=True, help="Job posting URL or raw text")
