@@ -82,6 +82,13 @@ def build_resume(
     # --- Call LLM ---
     raw_output = llm.complete(system_prompt, user_prompt)
 
+    # --- Validate job content sentinel ---
+    if raw_output.strip().startswith("JOB_CONTENT_ERROR:"):
+        reason = raw_output.strip().removeprefix("JOB_CONTENT_ERROR:").strip()
+        print(f"[resume-helper] ERROR: Job posting content is insufficient — {reason}", file=sys.stderr)
+        print("[resume-helper] Try pasting the job description as raw text instead.", file=sys.stderr)
+        sys.exit(1)
+
     # --- Resolve output path ---
     resolved_output = _resolve_output_path(output_path, role_tag, _out_md)
 
