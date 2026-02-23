@@ -99,10 +99,16 @@ All other sections (Education, Supporting Experience, etc.) are preserved as-is.
 
 ### Build a tailored resume
 
-Run the tool with a job posting URL or copy-pasta'd job description:
+Run the tool with a job posting URL:
 
 ```bash
 resume-helper --job "https://jobs.example.com/ds-role"
+```
+
+Or omit `--job` to be prompted to paste the job description interactively (press Ctrl+D when done):
+
+```bash
+resume-helper
 ```
 
 Output is saved automatically to `users/<your-name>/resumes/enhanced/` and named by
@@ -121,13 +127,26 @@ resume-helper \
   --user <your-name>                                              # optional if RESUME_HELPER_USER is set
 ```
 
-**`--job` accepts a URL or raw text.** URL scraping works for public job postings
-(Ashby, Lever, Greenhouse, etc.). Pages behind a login wall (LinkedIn, Workday SSO)
-will return the login screen — in those cases, paste the job description directly:
+**`--job` accepts a URL, raw text, or `-` to read from stdin.**
+
+URL scraping works for public job postings (Ashby, Lever, Greenhouse, etc.). Pages behind
+a login wall (LinkedIn, Workday SSO) will return the login screen — in those cases, paste
+the job description instead using one of these approaches:
 
 ```bash
-resume-helper --job "$(pbpaste)"   # macOS: paste from clipboard
+# Interactive paste (recommended): omit --job or pass --job -
+resume-helper
+# → Paste job description below, then press Ctrl+D when done:
+
+# Pipe from clipboard (macOS)
+pbpaste | resume-helper --job -
+
+# Pipe from a file
+resume-helper --job - < job.txt
 ```
+
+Pasting interactively or piping avoids shell quoting issues with job descriptions that
+contain quotation marks.
 
 **Valid `--role` values:**
 `data_scientist`, `machine_learning_engineer`, `analytics_engineer`,
