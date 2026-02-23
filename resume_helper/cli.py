@@ -12,7 +12,7 @@ def _read_job_input(job_arg: str | None) -> str:
         return job_arg
 
     if sys.stdin.isatty():
-        print("Paste job description below, then press Ctrl+D when done:", file=sys.stderr)
+        print("Paste job description below, then press Enter followed by Ctrl+D when done:", file=sys.stderr)
 
     text = sys.stdin.read()
 
@@ -35,7 +35,7 @@ def main() -> None:
         default=None,
         help=(
             "Job posting URL, raw text, or '-' to read from stdin. "
-            "Omit entirely to be prompted for interactive paste (Ctrl+D to finish)."
+            "Omit entirely to be prompted for interactive paste (Enter then Ctrl+D to finish)."
         ),
     )
     parser.add_argument("--projects", help="Path to projects.json (default: data/projects.json)")

@@ -105,7 +105,7 @@ Run the tool with a job posting URL:
 resume-helper --job "https://jobs.example.com/ds-role"
 ```
 
-Or omit `--job` to be prompted to paste the job description interactively (press Ctrl+D when done):
+Or omit `--job` to be prompted to paste the job description interactively (press Enter then Ctrl+D when done):
 
 ```bash
 resume-helper
@@ -136,7 +136,7 @@ the job description instead using one of these approaches:
 ```bash
 # Interactive paste (recommended): omit --job or pass --job -
 resume-helper
-# → Paste job description below, then press Ctrl+D when done:
+# → Paste job description below, then press Enter, then Ctrl+D when done:
 
 # Pipe from clipboard (macOS)
 pbpaste | resume-helper --job -
