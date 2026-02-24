@@ -30,7 +30,10 @@ Stylistic rules:
 - Don't use em-dashes, '-', when creating project text.
 - Use horizontal rules, '---', before any H2 ('##') sections.
 - Use a horizontal rule at the very end of the resume, if not already present.
-- bold text for role and company, but not duration and location.
+- Bold text for role and company, but not duration and location.
+- Include an extra new line when a list starts under a heading to provide a sufficient 
+  buffer for markdown list to render correctly, 
+  e.g. '## Heading 2 (two new lines) - Bullet point info here'
 
 Output format:
 COMPANY: <exact company name from the job posting>
