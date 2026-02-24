@@ -76,6 +76,55 @@ while leaving all other resume sections untouched.
 
 ---
 
+## Web UI (Docker)
+
+A browser-based UI is available via Docker — no local Python or pandoc install required.
+
+### Prerequisites
+
+Install **Docker Desktop** for Mac:
+
+1. Download from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/)
+2. Open the `.dmg`, drag Docker to Applications, and launch it
+3. Wait for the whale icon in the menu bar to show "Docker Desktop is running"
+4. Verify in a new terminal:
+
+   ```bash
+   docker compose version
+   ```
+
+### Running the UI
+
+1. **Configure your API key** (same `.env` as the CLI):
+
+   ```bash
+   cp .env.example .env
+   # edit .env and fill in GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY
+   ```
+
+2. **Build and start:**
+
+   ```bash
+   docker compose build
+   docker compose up
+   ```
+
+3. Open **http://localhost:7860** in your browser.
+
+Your `users/` directory is volume-mounted, so all profiles, uploaded resumes, and generated
+outputs are persisted on your machine. The container reads `shared/pandoc_template.docx`
+from the same mount.
+
+4. **Stop** with `Ctrl+C`, then `docker compose down`.
+
+### Verifying the CLI still works inside the container
+
+```bash
+docker exec -it resume-helper-resume-helper-1 resume-helper --help
+```
+
+---
+
 ## Resume format
 
 Resume Helper expects your base resume as a PDF at
@@ -262,7 +311,11 @@ resume_helper/
 │   ├── import_projects/              # Importer subpackage
 │   ├── llm/                          # Provider abstraction + Claude/Gemini/OpenAI
 │   ├── output/                       # Formatter: strip notes, write .md file
-│   └── parsers/                      # PDF parser + job posting scraper
+│   ├── parsers/                      # PDF parser + job posting scraper
+│   ├── cli.py                        # CLI entrypoint (resume-helper)
+│   └── gui.py                        # Gradio web UI (resume-helper-app)
+├── Dockerfile
+├── docker-compose.yml
 ├── smoke_test.py
 ├── pyproject.toml
 └── .env.example

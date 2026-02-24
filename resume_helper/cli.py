@@ -58,16 +58,19 @@ def main() -> None:
 
     # Import here to keep startup fast and allow stubs during scaffold
     from resume_helper.builder.resume_builder import build_resume  # noqa: F401
-    build_resume(
-        resume_path=args.resume,
-        job_input=job_input,
-        projects_path=args.projects,
-        role_tag=args.role,
-        provider=args.provider,
-        output_path=args.output,
-        reference_doc=args.reference_doc,
-        user_paths=user_paths,
-    )
+    try:
+        build_resume(
+            resume_path=args.resume,
+            job_input=job_input,
+            projects_path=args.projects,
+            role_tag=args.role,
+            provider=args.provider,
+            output_path=args.output,
+            reference_doc=args.reference_doc,
+            user_paths=user_paths,
+        )
+    except (FileNotFoundError, ValueError):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

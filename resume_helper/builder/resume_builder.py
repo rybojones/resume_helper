@@ -25,7 +25,7 @@ def build_resume(
     output_path: str | None,
     reference_doc: str | None = None,
     user_paths: UserPaths | None = None,
-) -> None:
+) -> tuple[Path, Path]:
     # --- Resolve defaults ---
     _p = user_paths
     resolved_resume   = Path(resume_path)   if resume_path   else (_p.resume    if _p else DEFAULT_RESUME_PATH)
@@ -41,7 +41,7 @@ def build_resume(
         if resume_path:
             # Explicit path was given but not found — hard error
             print(f"[resume-helper] ERROR: Resume not found: {resolved_resume}", file=sys.stderr)
-            sys.exit(1)
+            raise FileNotFoundError(f"Resume not found: {resolved_resume}")
         # Default path missing — soft fallback, LLM builds from projects
         print(
             f"[resume-helper] No resume found at default path ({resolved_resume}), "
@@ -59,7 +59,7 @@ def build_resume(
             "[resume-helper] Try pasting the job description as raw text instead.",
             file=sys.stderr,
         )
-        sys.exit(1)
+        raise ValueError("Could not extract job posting content from the provided URL.")
 
     # --- Load and filter projects ---
     print(f"[resume-helper] Loading projects: {resolved_projects}", file=sys.stderr)
@@ -87,7 +87,7 @@ def build_resume(
         reason = raw_output.strip().removeprefix("JOB_CONTENT_ERROR:").strip()
         print(f"[resume-helper] ERROR: Job posting content is insufficient — {reason}", file=sys.stderr)
         print("[resume-helper] Try pasting the job description as raw text instead.", file=sys.stderr)
-        sys.exit(1)
+        raise ValueError(f"Job posting content is insufficient — {reason}")
 
     # --- Resolve output path ---
     resolved_output = _resolve_output_path(output_path, role_tag, _out_md)
@@ -102,6 +102,8 @@ def build_resume(
     # --- Convert to DOCX (soft failure) ---
     ref = Path(reference_doc) if reference_doc else DEFAULT_REFERENCE_DOCX
     _convert_to_docx(resolved_output, ref, _out_docx)
+
+    return resolved_output, _resolve_docx_path(resolved_output, _out_docx)
 
 
 def _extract_project_titles(resume_text: str) -> list[str]:

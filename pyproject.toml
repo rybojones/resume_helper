@@ -21,8 +21,12 @@ dependencies = [
     "python-dotenv>=1.0",
 ]
 
+[project.optional-dependencies]
+gui = ["gradio>=4.0"]
+
 [project.scripts]
 resume-helper = "resume_helper.cli:main"
+resume-helper-app = "resume_helper.gui:main"
 resume-helper-import-projects = "resume_helper.import_projects.cli:main"
 resume-helper-init = "resume_helper.init_user:main"
 resume-helper-users = "resume_helper.list_users:main"

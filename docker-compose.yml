@@ -1,0 +1,14 @@
+services:
+  resume-helper:
+    build: .
+    ports:
+      - "7860:7860"
+    env_file:
+      - .env
+    environment:
+      - RESUME_HELPER_USER=${RESUME_HELPER_USER:-}
+    volumes:
+      # Persist all user data and outputs outside the container
+      - ./users:/app/users
+      # Mount pandoc template so the container always has the latest version
+      - ./shared:/app/shared
