@@ -254,7 +254,7 @@ def main() -> None:
                     br_api_key = gr.Textbox(
                         label="API Key",
                         type="password",
-                        placeholder="Paste key here (never stored to disk)",
+                        placeholder="Leave blank to use .env, or paste to override",
                     )
                 br_button = gr.Button("Build Resume", variant="primary")
                 br_log = gr.Textbox(label="Progress Log", lines=8, interactive=False)
@@ -286,7 +286,7 @@ def main() -> None:
                     ip_api_key = gr.Textbox(
                         label="API Key",
                         type="password",
-                        placeholder="Paste key here (never stored to disk)",
+                        placeholder="Leave blank to use .env, or paste to override",
                     )
                 ip_button = gr.Button("Import Projects", variant="primary")
                 ip_log = gr.Textbox(label="Progress Log", lines=12, interactive=False)
