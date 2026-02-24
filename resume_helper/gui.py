@@ -191,10 +191,11 @@ def _import_projects_handler(
 
 
 def _create_user_handler(new_user: str, br_user_comp, ip_user_comp):
-    """Create Profile handler. Also refreshes the user dropdowns in other tabs."""
+    """Create Profile handler. Also refreshes the user dropdowns and user list."""
     name = new_user.strip()
     if not name:
-        return "ERROR: Profile name cannot be empty.", gr.update(), gr.update()
+        updated = _list_users()
+        return "ERROR: Profile name cannot be empty.", gr.update(), gr.update(), "\n".join(updated)
     user_paths = resolve_user_paths(name)
     ensure_user_dirs(user_paths)
     updated = _list_users()
@@ -202,6 +203,7 @@ def _create_user_handler(new_user: str, br_user_comp, ip_user_comp):
         f"Profile '{name}' created at users/{name}/",
         gr.update(choices=updated, value=name),
         gr.update(choices=updated, value=name),
+        "\n".join(updated),
     )
 
 
@@ -213,7 +215,8 @@ def main() -> None:
     providers = ["gemini", "openai", "claude"]
     role_choices = [""] + ROLE_TAGS
     users = _list_users()
-    default_user = users[0] if users else None
+    env_user = os.getenv("RESUME_HELPER_USER", "").strip()
+    default_user = env_user if env_user in users else (users[0] if users else None)
 
     with gr.Blocks(title="Resume Helper") as demo:
         selected_user = gr.State(value=default_user)
@@ -300,6 +303,12 @@ def main() -> None:
 
             # ── Manage Users ──────────────────────────────────────────────
             with gr.Tab("Manage Users"):
+                mu_user_list = gr.Textbox(
+                    label="Existing Profiles",
+                    value="\n".join(users),
+                    lines=max(len(users), 3),
+                    interactive=False,
+                )
                 mu_name = gr.Textbox(
                     label="New Profile Name", placeholder="e.g. jane_smith"
                 )
@@ -309,7 +318,7 @@ def main() -> None:
                 mu_button.click(
                     fn=_create_user_handler,
                     inputs=[mu_name, br_user, ip_user],
-                    outputs=[mu_output, br_user, ip_user],
+                    outputs=[mu_output, br_user, ip_user, mu_user_list],
                 )
 
         demo.launch(server_name="0.0.0.0", server_port=7860)
