@@ -1,5 +1,5 @@
 """Pydantic models — single source of truth for project and resume output schemas."""
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 ROLE_TAGS = [
     "data_scientist",
@@ -13,7 +13,7 @@ ROLE_TAGS = [
 
 class ProjectRecord(BaseModel):
     # Required fields
-    id: str = ""
+    id: str = Field(description="Unique identifier for the project")
     title: str
     summary: str
     skills: list[str]
