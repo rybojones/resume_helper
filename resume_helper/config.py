@@ -31,6 +31,7 @@ class UserPaths:
     projects: Path
     output_dir_md: Path
     output_dir_docx: Path
+    job_reqs_dir: Path
 
 
 def resolve_user_paths(user: str | None = None) -> UserPaths:
@@ -41,6 +42,7 @@ def resolve_user_paths(user: str | None = None) -> UserPaths:
         projects=root / "projects.json",
         output_dir_md=root / "resumes" / "enhanced" / "md",
         output_dir_docx=root / "resumes" / "enhanced" / "docx",
+        job_reqs_dir=root / "job_reqs",
     )
 
 
@@ -49,3 +51,4 @@ def ensure_user_dirs(paths: UserPaths) -> None:
     paths.resume.parent.mkdir(parents=True, exist_ok=True)   # resumes/legacy/
     paths.output_dir_md.mkdir(parents=True, exist_ok=True)
     paths.output_dir_docx.mkdir(parents=True, exist_ok=True)
+    paths.job_reqs_dir.mkdir(parents=True, exist_ok=True)

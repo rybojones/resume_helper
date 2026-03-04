@@ -32,6 +32,7 @@ def build_resume(
     resolved_projects = Path(projects_path) if projects_path else (_p.projects  if _p else DEFAULT_PROJECTS_PATH)
     _out_md           = _p.output_dir_md   if _p else OUTPUT_DIR_MD
     _out_docx         = _p.output_dir_docx if _p else OUTPUT_DIR_DOCX
+    _job_reqs_dir     = _p.job_reqs_dir    if _p else None
 
     # --- Parse base resume (optional) ---
     if resolved_resume.exists():
@@ -98,6 +99,12 @@ def build_resume(
     # --- Rename to company+role-based filename if auto-named ---
     if not output_path:
         resolved_output = _rename_with_metadata(resolved_output, result.company, result.role)
+
+    # --- Save job req text ---
+    if _job_reqs_dir:
+        job_req_path = _job_reqs_dir / resolved_output.with_suffix(".txt").name
+        job_req_path.write_text(job_text)
+        print(f"[resume-helper] Job req saved to: {job_req_path}", file=sys.stderr)
 
     # --- Convert to DOCX (soft failure) ---
     ref = Path(reference_doc) if reference_doc else DEFAULT_REFERENCE_DOCX

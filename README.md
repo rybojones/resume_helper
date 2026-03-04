@@ -301,6 +301,7 @@ resume_helper/
 │   │           ├── md/
 │   │           └── docx/
 │   └── <your-name>/                  # Your profile (created by resume-helper-init)
+│       ├── job_reqs/                 # Job postings saved automatically on each build
 │       └── ...
 ├── shared/
 │   ├── projects_empty.json           # Template copied to new user profiles
