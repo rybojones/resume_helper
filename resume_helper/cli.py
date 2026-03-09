@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from resume_helper.config import DEFAULT_PROVIDER, resolve_user_paths, ensure_user_dirs
+from resume_helper.config import DEFAULT_PROVIDER, DEFAULT_TEMPLATE, list_templates, resolve_user_paths, ensure_user_dirs
 from resume_helper.models import ROLE_TAGS
 
 
@@ -44,8 +44,11 @@ def main() -> None:
     parser.add_argument("--provider", default=DEFAULT_PROVIDER, help=f"LLM provider (default: {DEFAULT_PROVIDER})")
     parser.add_argument("--output", help="Output file path (auto-named if omitted)")
     parser.add_argument(
-        "--reference-doc",
-        help="Path to .docx reference template (default: resumes/legacy/resume_template.docx)",
+        "--template",
+        default=None,
+        choices=list_templates(),
+        metavar="TEMPLATE",
+        help=f"Resume template to use (default: {DEFAULT_TEMPLATE}). Available: {', '.join(list_templates())}",
     )
     parser.add_argument("--user", help="Your user profile name (or set RESUME_HELPER_USER env var)")
 
@@ -66,7 +69,7 @@ def main() -> None:
             role_tag=args.role,
             provider=args.provider,
             output_path=args.output,
-            reference_doc=args.reference_doc,
+            template=args.template,
             user_paths=user_paths,
         )
     except (FileNotFoundError, ValueError):

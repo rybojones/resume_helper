@@ -12,7 +12,7 @@ from pathlib import Path
 
 import gradio as gr
 
-from resume_helper.config import PROJECT_ROOT, resolve_user_paths, ensure_user_dirs
+from resume_helper.config import PROJECT_ROOT, DEFAULT_TEMPLATE, list_templates, resolve_user_paths, ensure_user_dirs
 from resume_helper.models import ROLE_TAGS
 
 
@@ -76,6 +76,7 @@ def _build_resume_handler(
     job_text: str,
     job_url: str,
     role_tag: str,
+    template: str,
     provider: str,
     api_key: str,
 ) -> tuple[str, str, str | None, str | None]:
@@ -105,7 +106,7 @@ def _build_resume_handler(
                 role_tag=role_tag or None,
                 provider=provider,
                 output_path=None,
-                reference_doc=None,
+                template=template,
                 user_paths=user_paths,
             )
 
@@ -214,6 +215,7 @@ def _create_user_handler(new_user: str, br_user_comp, ip_user_comp):
 def main() -> None:
     providers = ["gemini", "openai", "claude"]
     role_choices = [""] + ROLE_TAGS
+    templates = list_templates()
     users = _list_users()
     env_user = os.getenv("RESUME_HELPER_USER", "").strip()
     default_user = env_user if env_user in users else (users[0] if users else None)
@@ -230,6 +232,9 @@ def main() -> None:
                 with gr.Row():
                     br_user = gr.Dropdown(
                         choices=users, label="User Profile", value=default_user
+                    )
+                    br_template = gr.Dropdown(
+                        choices=templates, label="Template", value=DEFAULT_TEMPLATE
                     )
                     br_role = gr.Dropdown(
                         choices=role_choices, label="Role Tag (optional)", value=""
@@ -271,7 +276,7 @@ def main() -> None:
                     fn=_build_resume_handler,
                     inputs=[
                         br_user, br_resume, br_job_text, br_job_url,
-                        br_role, br_provider, br_api_key,
+                        br_role, br_template, br_provider, br_api_key,
                     ],
                     outputs=[br_log, br_preview, br_dl_md, br_dl_docx],
                 )

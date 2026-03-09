@@ -1,45 +1,15 @@
 """Assemble LLM prompts from all inputs."""
 
-SYSTEM_PROMPT = """\
-You are an expert resume writer with deep experience tailoring resumes to specific job postings.
 
-Rules you must follow without exception:
-- If the JOB POSTING section does not contain a recognisable job description (no discernible role, company, or responsibilities), respond with exactly one line and nothing else: JOB_CONTENT_ERROR: <one-sentence reason>
-- Output well-structured markdown. Use # for the candidate name, ## for section headers, ### for project titles, and ##### for contact info. #### will be used for the following:
-    - For jobs use this exact sequence: **[Role], [Employer]** | [Dates] | [Location].
-    - For degrees use this exact sequence: **[Degree], [University]** | [Date].
-    - For supporting experience subsections (Technologies & Skills, Certifications, Distinctions): **[Subsection Name]:** [supporting experience separated by commas]
-- IMPORTANT: Never invent facts, credentials, or experiences not present in the inputs. It is okay, and preferable to relate my experience with the job requirements, however it is never okay to lie (very slight embelishment is likely acceptable) or add completely false details to my experience just to fit the role.
-- The resume contains two experience sections:
-    - "Work Experience" — static. Reproduce it exactly, word for word. Do not add, remove, or rephrase any role, date, organisation, or Focus line.
-    - "Project Experience" — dynamic. Replace the entire contents of this section with your 4 to 7 project selections, tailored to the job posting. Don't include company name where work was done. Order projects from most relevant to least (using your discretion).
-- For the Project Experience section, select ONLY from the CANDIDATE PROJECTS list provided. Do not source any project content from the BASE RESUME section.
-- Keep all other sections (contact info, Education, Supporting Experience, etc.) verbatim.
-- Format each selected project as:
-    ### <Project Title>
-    <One tailored paragraph drawing on the project details and impact, emphasising relevance
-    to the job posting.>
-    - Single paragraph per project and no impact bullet-points.
-- End your response with a SELECTION NOTES section explaining which projects you chose, which you excluded, and why.
-
-Stylistic rules:
-- Don't use em-dashes, '-', when creating project text.
-- Use horizontal rule, '---', before any ## sections.
-- Use a horizontal rule at the very end of the resume, if not already present.
-
-Output format:
-COMPANY: <exact company name from the job posting>
-ROLE: <exact job title from the job posting>
-[Full markdown resume]
-
-## SELECTION NOTES
-[Your explanation of project selection and tailoring decisions]
-"""
-
-
-def build_prompt(base_resume_text: str | None, job_text: str, projects: list) -> tuple[str, str]:
+def build_prompt(
+    base_resume_text: str | None,
+    job_text: str,
+    projects: list,
+    system_prompt: str,
+) -> tuple[str, str]:
     """Assemble (system_prompt, user_prompt) from all inputs.
 
+    system_prompt is loaded from the active template's system_prompt.md.
     Returns a 2-tuple of strings ready to pass to an LLMProvider.
     """
     sections = []
@@ -63,22 +33,8 @@ def build_prompt(base_resume_text: str | None, job_text: str, projects: list) ->
     project_blocks = "\n\n".join(_format_project(p) for p in projects)
     sections.append(_section("CANDIDATE PROJECTS", project_blocks))
 
-    # --- Tailoring instructions ---
-    sections.append(
-        "INSTRUCTIONS\n"
-        "------------\n"
-        "1. Reproduce the Work Experience section exactly as it appears — every role, date, "
-        "organisation, and Focus line verbatim.\n"
-        "2. Replace the Project Experience section with 4 to 7 projects from CANDIDATE PROJECTS "
-        "that best match the job posting. Select ONLY from CANDIDATE PROJECTS — never from BASE RESUME.\n"
-        "3. Rewrite each selected project as: ### title, one concise tailored paragraph, \n"
-        "4. Keep Education and Supporting Experience verbatim.\n"
-        "5. Do not add any experience, skills, or credentials not present in the inputs.\n"
-        "6. After the resume, append a SELECTION NOTES section explaining your choices."
-    )
-
     user_prompt = "\n\n" + "\n\n".join(sections) + "\n"
-    return SYSTEM_PROMPT, user_prompt
+    return system_prompt, user_prompt
 
 
 def _section(title: str, content: str) -> str:

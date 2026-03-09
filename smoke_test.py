@@ -109,7 +109,7 @@ check("MergedProjectText validates",
 
 def _resolve_duplicates_no_existing():
     existing = []
-    new = [ProjectRecord(title="T", summary="s", skills=[], role_tags=["data_scientist"], impact=[])]
+    new = [ProjectRecord(id="proj_new", title="T", summary="s", skills=[], role_tags=["data_scientist"], impact=[])]
     truly_new, updated = resolve_duplicates(existing, new, llm=None)
     assert len(truly_new) == 1
     assert updated == []
@@ -130,7 +130,7 @@ def _resolve_duplicates_stub_no_match():
          "organization": "", "role": "", "dates": {}, "description_long": "",
          "keywords": [], "include_by_default": False, "notes": ""}
     ]
-    new = [ProjectRecord(title="New Project", summary="new summary", skills=["SQL"],
+    new = [ProjectRecord(id="proj_new", title="New Project", summary="new summary", skills=["SQL"],
                          role_tags=["data_analyst"], impact=[])]
     truly_new, updated = resolve_duplicates(existing, new, _StubLLM())
     assert len(truly_new) == 1, f"expected 1 truly new, got {len(truly_new)}"
@@ -154,7 +154,7 @@ def _resolve_duplicates_stub_match():
          "organization": "Acme", "role": "", "dates": {}, "description_long": "old desc",
          "keywords": [], "include_by_default": False, "notes": ""}
     ]
-    new = [ProjectRecord(title="Old Project v2", summary="new summary", skills=["Python", "SQL"],
+    new = [ProjectRecord(id="proj_new", title="Old Project v2", summary="new summary", skills=["Python", "SQL"],
                          role_tags=["data_scientist", "data_analyst"], impact=["10% improvement", "saved $1M"],
                          description_long="new desc")]
     truly_new, updated = resolve_duplicates(existing, new, _StubLLM())
@@ -175,7 +175,7 @@ print("\n-- config --")
 
 from resume_helper.config import (
     DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR, DEFAULT_PROVIDER,
-    OUTPUT_DIR_MD, OUTPUT_DIR_DOCX, DEFAULT_REFERENCE_DOCX,
+    OUTPUT_DIR_MD, OUTPUT_DIR_DOCX, DEFAULT_TEMPLATE, list_templates, resolve_template,
 )
 
 check("DEFAULT_RESUME_PATH points to resume_default.pdf",
@@ -189,8 +189,17 @@ check("OUTPUT_DIR_MD contains 'md'",
       lambda: None if "md" in str(OUTPUT_DIR_MD) else (_ for _ in ()).throw(AssertionError(OUTPUT_DIR_MD)))
 check("OUTPUT_DIR_DOCX contains 'docx'",
       lambda: None if "docx" in str(OUTPUT_DIR_DOCX) else (_ for _ in ()).throw(AssertionError(OUTPUT_DIR_DOCX)))
-check("DEFAULT_REFERENCE_DOCX points to pandoc_template.docx",
-      lambda: None if "pandoc_template.docx" in str(DEFAULT_REFERENCE_DOCX) else (_ for _ in ()).throw(AssertionError(DEFAULT_REFERENCE_DOCX)))
+check("DEFAULT_TEMPLATE is set",
+      lambda: None if DEFAULT_TEMPLATE else (_ for _ in ()).throw(AssertionError("empty")))
+check("list_templates returns at least one template",
+      lambda: None if list_templates() else (_ for _ in ()).throw(AssertionError("no templates found")))
+
+def _resolve_template_check():
+    text, pandoc_path = resolve_template(DEFAULT_TEMPLATE)
+    assert text, "system_prompt.md should not be empty"
+    assert pandoc_path.exists(), f"pandoc_template.docx not found at {pandoc_path}"
+
+check("resolve_template loads system_prompt and pandoc_template.docx", _resolve_template_check)
 
 # ---------------------------------------------------------------------------
 # Default resume and projects files exist
@@ -268,19 +277,22 @@ check("merge_projects deduplicates and adds new", _merge_check)
 # ---------------------------------------------------------------------------
 print("\n-- prompt_builder --")
 
-from resume_helper.builder.prompt_builder import build_prompt, SYSTEM_PROMPT
+from resume_helper.builder.prompt_builder import build_prompt
 
-check("SYSTEM_PROMPT mentions 'Work Experience'",
-      lambda: None if "Work Experience" in SYSTEM_PROMPT else (_ for _ in ()).throw(AssertionError("missing")))
-check("SYSTEM_PROMPT mentions 'Project Experience'",
-      lambda: None if "Project Experience" in SYSTEM_PROMPT else (_ for _ in ()).throw(AssertionError("missing")))
+_system_prompt_text, _ = resolve_template(DEFAULT_TEMPLATE)
 
-def _prompt_instructions_check():
-    _, user_prompt = build_prompt("RESUME TEXT", "JOB TEXT", [])
-    assert "Work Experience" in user_prompt
-    assert "Project Experience" in user_prompt
+check("system_prompt.md mentions 'Work Experience'",
+      lambda: None if "Work Experience" in _system_prompt_text else (_ for _ in ()).throw(AssertionError("missing")))
+check("system_prompt.md mentions 'Project Experience'",
+      lambda: None if "Project Experience" in _system_prompt_text else (_ for _ in ()).throw(AssertionError("missing")))
 
-check("build_prompt instructions reference both section names", _prompt_instructions_check)
+def _prompt_sections_check():
+    _, user_prompt = build_prompt("RESUME TEXT", "JOB TEXT", [], _system_prompt_text)
+    assert "BASE RESUME" in user_prompt
+    assert "JOB POSTING" in user_prompt
+    assert "CANDIDATE PROJECTS" in user_prompt
+
+check("build_prompt user_prompt contains BASE RESUME, JOB POSTING, CANDIDATE PROJECTS", _prompt_sections_check)
 
 # ---------------------------------------------------------------------------
 # formatter: SELECTION NOTES stripped
@@ -349,11 +361,13 @@ def _ensure_dirs_check():
             projects=Path(tmp) / "projects.json",
             output_dir_md=Path(tmp) / "resumes" / "enhanced" / "md",
             output_dir_docx=Path(tmp) / "resumes" / "enhanced" / "docx",
+            job_reqs_dir=Path(tmp) / "job_reqs",
         )
         ensure_user_dirs(paths)
         assert paths.resume.parent.exists(), "legacy/ dir not created"
         assert paths.output_dir_md.exists(), "md/ dir not created"
         assert paths.output_dir_docx.exists(), "docx/ dir not created"
+        assert paths.job_reqs_dir.exists(), "job_reqs/ dir not created"
         assert not paths.projects.exists(), "projects.json should NOT be created by ensure_user_dirs"
 
 
@@ -377,8 +391,8 @@ check("list_users output includes jayne_dough", _list_users_check)
 # ---------------------------------------------------------------------------
 print("\n-- prompt constraint --")
 
-check("SYSTEM_PROMPT forbids using BASE RESUME for projects",
-      lambda: None if "CANDIDATE PROJECTS" in SYSTEM_PROMPT and "BASE RESUME" in SYSTEM_PROMPT
+check("system_prompt.md forbids using BASE RESUME for projects",
+      lambda: None if "CANDIDATE PROJECTS" in _system_prompt_text and "BASE RESUME" in _system_prompt_text
       else (_ for _ in ()).throw(AssertionError("constraint missing")))
 
 # ---------------------------------------------------------------------------

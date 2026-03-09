@@ -5,8 +5,8 @@ from pathlib import Path
 
 from resume_helper.config import (
     DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR,
-    OUTPUT_DIR_MD, OUTPUT_DIR_DOCX, DEFAULT_REFERENCE_DOCX,
-    UserPaths,
+    OUTPUT_DIR_MD, OUTPUT_DIR_DOCX,
+    UserPaths, resolve_template,
 )
 from resume_helper.output.md2docx import check_pandoc_installed, convert_markdown_to_docx
 from resume_helper.parsers.pdf_parser import parse_pdf
@@ -23,7 +23,7 @@ def build_resume(
     role_tag: str | None,
     provider: str,
     output_path: str | None,
-    reference_doc: str | None = None,
+    template: str | None = None,
     user_paths: UserPaths | None = None,
 ) -> tuple[Path, Path]:
     # --- Resolve defaults ---
@@ -73,8 +73,12 @@ def build_resume(
     if base_resume_text:
         _preflight_coverage_check(base_resume_text, projects)
 
+    # --- Load template ---
+    system_prompt_text, pandoc_path = resolve_template(template)
+    print(f"[resume-helper] Using template: {template or 'project_focused_long'}", file=sys.stderr)
+
     # --- Build prompt ---
-    system_prompt, user_prompt = build_prompt(base_resume_text, job_text, projects)
+    system_prompt, user_prompt = build_prompt(base_resume_text, job_text, projects, system_prompt_text)
 
     # --- Select LLM provider ---
     llm = _get_provider(provider)
@@ -107,8 +111,7 @@ def build_resume(
         print(f"[resume-helper] Job req saved to: {job_req_path}", file=sys.stderr)
 
     # --- Convert to DOCX (soft failure) ---
-    ref = Path(reference_doc) if reference_doc else DEFAULT_REFERENCE_DOCX
-    _convert_to_docx(resolved_output, ref, _out_docx)
+    _convert_to_docx(resolved_output, pandoc_path, _out_docx)
 
     return resolved_output, _resolve_docx_path(resolved_output, _out_docx)
 
