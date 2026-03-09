@@ -9,7 +9,7 @@ Rules you must follow without exception:
     - For jobs use this exact sequence: **[Role], [Employer]** | [Dates] | [Location].
     - For degrees use this exact sequence: **[Degree], [University]** | [Date].
     - For supporting experience subsections (Technologies & Skills, Certifications, Distinctions): **[Subsection Name]:** [supporting experience separated by commas]
-- Never invent facts, credentials, or experiences not present in the inputs.
+- IMPORTANT: Never invent facts, credentials, or experiences not present in the inputs. It is okay, and preferable to relate my experience with the job requirements, however it is never okay to lie (very slight embelishment is likely acceptable) or add completely false details to my experience just to fit the role.
 - The resume contains two experience sections:
     - "Work Experience" — static. Reproduce it exactly, word for word. Do not add, remove, or rephrase any role, date, organisation, or Focus line.
     - "Project Experience" — dynamic. Replace the entire contents of this section with your 4 to 7 project selections, tailored to the job posting. Don't include company name where work was done. Order projects from most relevant to least (using your discretion).
@@ -69,9 +69,9 @@ def build_prompt(base_resume_text: str | None, job_text: str, projects: list) ->
         "------------\n"
         "1. Reproduce the Work Experience section exactly as it appears — every role, date, "
         "organisation, and Focus line verbatim.\n"
-        "2. Replace the Project Experience section with 3 to 5 projects from CANDIDATE PROJECTS "
+        "2. Replace the Project Experience section with 4 to 7 projects from CANDIDATE PROJECTS "
         "that best match the job posting. Select ONLY from CANDIDATE PROJECTS — never from BASE RESUME.\n"
-        "3. Rewrite each selected project as: ### title, one tailored paragraph, \n"
+        "3. Rewrite each selected project as: ### title, one concise tailored paragraph, \n"
         "4. Keep Education and Supporting Experience verbatim.\n"
         "5. Do not add any experience, skills, or credentials not present in the inputs.\n"
         "6. After the resume, append a SELECTION NOTES section explaining your choices."
