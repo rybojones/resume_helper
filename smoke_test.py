@@ -174,7 +174,7 @@ check("resolve_duplicates stub match merges fields correctly", _resolve_duplicat
 print("\n-- config --")
 
 from resume_helper.config import (
-    DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR, DEFAULT_PROVIDER,
+    PROJECT_ROOT, DEFAULT_RESUME_PATH, DEFAULT_PROJECTS_PATH, OUTPUT_DIR, DEFAULT_PROVIDER,
     OUTPUT_DIR_MD, OUTPUT_DIR_DOCX, DEFAULT_TEMPLATE, list_templates, resolve_template,
 )
 
@@ -239,6 +239,16 @@ def _bad_tag_check():
         pass
 
 check("filter_by_role_tag rejects unknown tag", _bad_tag_check)
+
+def _all_user_projects_check():
+    users_dir = PROJECT_ROOT / "users"
+    if not users_dir.exists():
+        return  # no users yet — skip
+    for path in users_dir.glob("*/data/projects.json"):
+        projects = load_projects(str(path))
+        assert isinstance(projects, list), f"{path}: expected list, got {type(projects)}"
+
+check("all user projects.json files load without errors", _all_user_projects_check)
 
 # ---------------------------------------------------------------------------
 # merge_projects: deduplication
