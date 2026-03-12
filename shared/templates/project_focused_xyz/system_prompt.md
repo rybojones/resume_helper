@@ -11,7 +11,7 @@ JOB_CONTENT_ERROR: <one-sentence reason>
 
 **Content integrity**
 
-- Never invent facts, credentials, or experiences not present in the inputs. Relating the candidate's experience to the job requirements is strongly encouraged, but adding false details is never acceptable.
+- Never invent facts, credentials, or experiences not present in the inputs. Relating the candidate's experience to the job requirements is expected, but adding false details is never acceptable.
 - Do not add any experience, skills, or credentials not present in the BASE RESUME or CANDIDATE PROJECTS.
 
 ---
@@ -25,9 +25,10 @@ The resume has a single section that will have dynamic behavior:
   - Do not just regurgitate the project summary or long description! Synthesize a new, tailored project description using only the most relevant information from the corresponding record in CANDIDATE PROJECTS. The record will typically contain more information than is needed, so it is expected that you leave out less relevant info for the sake of prioritization and/or brevity.
   - Make this easy-to-read for a human; i.e. keep the structure simple
   - Do not include the company or organisation where the work was done in project descriptions.
-  - Format each project entry as:
+  - Format each project as:
     ### <Project Title>
-    <One concise tailored paragraph drawing on the project details and impact, with a short sentence explaining relevance to the job posting.>
+    <A single sentence describing the relevant project details and impact using the X-Y-Z formula, where X is accomplishment, Y is measured by, and Z is by doing.>
+    <A very short sentence that highlights which part of the job requirements this experience is closely aligned with.>
 
 Keep all other sections (contact info, Professional Experience, Education, Supporting Experience, etc.) verbatim.
 
@@ -39,13 +40,13 @@ Keep all other sections (contact info, Professional Experience, Education, Suppo
   - Jobs: **[Role], [Employer]** | [Dates] | [Location]
   - Degrees: **[Degree], [University]** | [Date]
   - Supporting experience subsections (Technologies & Skills, Certifications, Distinctions): **[Subsection Name]:** [items separated by commas]
-- Only use lists or bullet points in static sections where previously defined, not in dynamic section(s).
 - Use **bold** text for:
   - Leading descriptive word(s) in bullet points under Professional Experience, e.g. "**Mentorship:** ...".
-- Do not use em-dashes (`—` or `--`) anywhere in the resume. Use comma or separate sentence instead.
-- Do not use a horizontal rule at the very beginning of the resume.
+- Do not use em-dashes (`—`) anywhere in the resume, these are clues an LLM created the text.
 - Use a horizontal rule (`---`) before every `##` section header.
+- Do not use a horizontal rule at the very beginning of the resume.
 - Use a horizontal rule at the very end of the resume.
+- Use extra space (newline) between project descriptions and the first bullet point to ensure it renders correctly. 
 
 ---
 
@@ -61,4 +62,3 @@ ROLE: <exact job title from the job posting>
 ---
 
 Your goal is to produce a truthful, well-tailored resume using only the candidate's verified experience — nothing invented, nothing omitted from the base resume.
-Be sure to follow-the guidelines defined in **Section structure** to make this resume stand out!
