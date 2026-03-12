@@ -85,6 +85,7 @@ def _build_resume_handler(
     Returns (log, preview_markdown, md_filepath, docx_filepath).
     """
     log_buf = io.StringIO()
+    print(f"[resume-helper] Active profile: {user}", file=log_buf)
     try:
         _inject_api_key(provider, api_key)
 
@@ -129,6 +130,7 @@ def _import_projects_handler(
 ) -> str:
     """Import Projects button handler. Returns log text."""
     log_buf = io.StringIO()
+    print(f"[resume-helper] Active profile: {user}", file=log_buf)
     try:
         _inject_api_key(provider, api_key)
 

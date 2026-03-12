@@ -1,5 +1,6 @@
 """Thin CLI entrypoint. Parses args and delegates to build_resume()."""
 import argparse
+import os
 import sys
 
 from resume_helper.config import DEFAULT_PROVIDER, DEFAULT_TEMPLATE, list_templates, resolve_user_paths, ensure_user_dirs
@@ -58,6 +59,8 @@ def main() -> None:
 
     user_paths = resolve_user_paths(args.user)
     ensure_user_dirs(user_paths)
+    active_user = args.user or os.getenv("RESUME_HELPER_USER", "").strip() or "jayne_dough"
+    print(f"[resume-helper] Active profile: {active_user}", file=sys.stderr)
 
     # Import here to keep startup fast and allow stubs during scaffold
     from resume_helper.builder.resume_builder import build_resume  # noqa: F401

@@ -16,7 +16,7 @@ OUTPUT_DIR_MD   = OUTPUT_DIR / "md"
 OUTPUT_DIR_DOCX = OUTPUT_DIR / "docx"
 
 TEMPLATES_DIR = PROJECT_ROOT / "shared" / "templates"
-DEFAULT_TEMPLATE = "project_focused_long"
+DEFAULT_TEMPLATE = "project_focused_xyz"
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
