@@ -26,6 +26,7 @@ class ProjectRecord(BaseModel):
     description_long: str = ""
     keywords: list[str] = []
     include_by_default: bool = False
+    enabled: bool = True
     notes: str = ""
 
     @field_validator("role_tags")

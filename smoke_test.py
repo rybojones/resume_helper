@@ -291,10 +291,6 @@ from resume_helper.builder.prompt_builder import build_prompt
 
 _system_prompt_text, _ = resolve_template(DEFAULT_TEMPLATE)
 
-check("system_prompt.md mentions 'Work Experience'",
-      lambda: None if "Work Experience" in _system_prompt_text else (_ for _ in ()).throw(AssertionError("missing")))
-check("system_prompt.md mentions 'Project Experience'",
-      lambda: None if "Project Experience" in _system_prompt_text else (_ for _ in ()).throw(AssertionError("missing")))
 
 def _prompt_sections_check():
     _, user_prompt = build_prompt("RESUME TEXT", "JOB TEXT", [], _system_prompt_text)

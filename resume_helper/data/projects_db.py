@@ -22,7 +22,7 @@ def load_projects(path: str) -> list:
     except ValidationError as exc:
         raise ValueError(f"projects.json validation error: {exc}") from exc
 
-    return [p.model_dump() for p in validated.projects]
+    return [p.model_dump() for p in validated.projects if p.enabled]
 
 
 def merge_projects(existing: list, new_projects: list, projects_path: str) -> tuple[int, list]:
